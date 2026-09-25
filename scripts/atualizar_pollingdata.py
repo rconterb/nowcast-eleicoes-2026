@@ -3,17 +3,12 @@
 e escolhe a pesquisa mais recente com Lula e Flavio no mesmo cenario.
 
 Uso:
-  python3 atualizar_pollingdata.py
-
-Gera pollingdata_ufs.json ao lado deste script.
-A API /api/* alimenta o site; nao e documentada e o agregado estadual
-costuma vir locked (produto Pro). Usamos a tabela tabPesquisas.
+  python3 scripts/atualizar_pollingdata.py
 """
 from __future__ import annotations
 
 import json
 import time
-import urllib.parse
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
@@ -31,11 +26,16 @@ def get_json(url: str) -> dict:
         return json.loads(r.read())
 
 
+def norm(s: str) -> str:
+    table = str.maketrans("áàãâéêíóôõúüç", "aaaaeeiooouuc")
+    return (s or "").lower().translate(table)
+
+
 def who(nome: str) -> str | None:
-    n = (nome or "").lower()
+    n = norm(nome)
     if "lula" in n:
         return "Lula"
-    if "flavio" in n or "flavio" in n:
+    if "flavio" in n:
         return "Flavio"
     return None
 
