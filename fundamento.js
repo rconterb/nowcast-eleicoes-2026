@@ -23,9 +23,14 @@ function ensureFundamento(){
   const card=document.createElement('div');
   card.className='card s12';
   card.id='fundamento';
-  card.innerHTML='<div class="k">De onde vêm as contas</div><p class="help">Mosaico ponderado pelo eleitorado, esperado no pedaço da noite, palpite aritmético, encolhimento κ = w/(w+0,28) e swing amortecido φ(Sul,Nordeste)=0,22 calibrado em 2018 e 2022.</p>';
+  card.innerHTML='<div class="k">De onde vêm as contas</div><p class="help">Mapas TSE 2018 e 2022 interpolados por estado. Esperado no pedaço = mapa × ordem da apuração. Tendência = desvio da TV encolhido com κ = w/(w+0,28).</p>';
   host.appendChild(card);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureFundamento);
 else ensureFundamento();
-(function(){ const s=document.createElement('script'); s.src='turno.js'; document.body.appendChild(s); })();
+(function(){
+  const a=document.createElement('script');
+  a.src='turno.js';
+  a.onload=function(){ const b=document.createElement('script'); b.src='swing.js'; document.body.appendChild(b); };
+  document.body.appendChild(a);
+})();
