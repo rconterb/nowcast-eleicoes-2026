@@ -98,7 +98,7 @@
     <div class="card s6"><div class="k">Quanto o site acredita no desvio da TV</div><div class="v" id="vKappa">—</div><p class="tiny" id="tKappa"></p></div>
     <div class="card s12">
       <div class="k">Rota para ganhar no primeiro turno</div>
-      <p class="help">Vence no 1º turno quem passa de 50% dos válidos. O avanço até os 50% é espalhado pelo país inteiro — também na Bahia, em Pernambuco, no Ceará — não concentrado no pedaço que já saiu. Por isso não aparece mais um 80% na TV.</p>
+      <p class="help">Vence no 1º turno quem passa de 50% dos válidos. O avanço até os 50% nasce na base do candidato e chega fraco no polo oposto — calibrado em 2018 e 2022. As fórmulas estão no fim da página.</p>
       <label style="margin-top:12px">Percentual já apurado</label>
       <input id="slider1t" type="range" min="1" max="100" step="1" value="15" />
       <div class="v" id="slider1tVal" style="font-size:1.2rem">15%</div>
@@ -108,7 +108,7 @@
           <div class="k">Lula</div>
           <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
           <div class="v l" id="l1tExp">—</div>
-          <div class="help">TV se o avanço a 50% já valesse em todo o país</div>
+          <div class="help">TV se o avanço a 50% já valesse, com mais peso na base dele</div>
           <div class="need l" id="l1tNeed">—</div>
           <p class="tiny" id="l1tBand"></p>
           <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="l1tFinal">—</b></p>
@@ -118,7 +118,7 @@
           <div class="k">Flávio</div>
           <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
           <div class="v f" id="f1tExp">—</div>
-          <div class="help">TV se o avanço a 50% já valesse em todo o país</div>
+          <div class="help">TV se o avanço a 50% já valesse, com mais peso na base dele</div>
           <div class="need f" id="f1tNeed">—</div>
           <p class="tiny" id="f1tBand"></p>
           <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="f1tFinal">—</b></p>
@@ -126,7 +126,6 @@
         </div>
       </div>
       <svg id="chart1t" viewBox="0 0 640 260" width="100%" height="260" role="img" aria-label="Rota para o primeiro turno"></svg>
-      <p class="tiny">Sólido: previsto nas pesquisas. Tracejado: a TV se o mesmo avanço até 50% já estivesse valendo em todo o país, inclusive nos estados fracos.</p>
     </div>
     <div class="card s12">
       <div class="k">Como o placar costuma andar durante a noite</div>
@@ -140,12 +139,11 @@
       <p class="tiny">Se um estado já tiver resultado fechado, preencha “na urna”.</p>
       <div style="overflow:auto;max-height:560px;margin-top:8px"><table id="tab"></table></div>
     </div>
-    <div class="card s6"><div class="k">Exemplo clássico</div><p class="tiny">Com 15% apurado, quase só o Sul entrou. Flávio à frente nisso é o esperado — não é o Brasil.</p></div>
-    <div class="card s6"><div class="k">De onde vêm os números</div><p class="tiny">Eleitorado TSE jul/2026. Pesquisas PollingData por UF. Limiar: 50% + 1 dos válidos. Não é urna oficial.</p></div>
   </div>
   <footer>Ferramenta aberta · rconterb/nowcast-eleicoes-2026</footer>
 </div>
 <script src="app.js"></script>
 <script src="firstround.js"></script>
+<script src="fundamento.js"></script>
 </body>
 </html>
