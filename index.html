@@ -27,9 +27,11 @@
   .bar i { display:block; height:100%; }
   label { display:block; font-size:13px; color:var(--muted); margin-bottom:5px; }
   input[type=number] { width:100%; background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-size:1rem; font-family:inherit; }
+  input[type=range] { width:100%; accent-color:#1c1917; height:28px; }
   input:focus { outline:2px solid #c7d7f5; border-color:#93b4ea; }
   .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-  @media (max-width:640px){ .row3{grid-template-columns:1fr;} }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:800px){ .row3,.pair{grid-template-columns:1fr;} }
   table { width:100%; border-collapse:collapse; font-size:14px; }
   th, td { padding:9px 8px; border-bottom:1px solid var(--line); text-align:right; }
   th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
@@ -55,6 +57,10 @@
   .how div { background:#f7f2ea; border-radius:10px; padding:12px 14px; }
   .how b { display:block; margin-bottom:4px; }
   .help { margin:8px 0 0; font-size:13.5px; color:var(--muted); }
+  .cand { border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .cand.lula { border-top:3px solid var(--lula); }
+  .cand.flavio { border-top:3px solid var(--flavio); }
+  .need { font-size:2rem; font-weight:700; letter-spacing:-.03em; margin:4px 0; }
 </style>
 </head>
 <body>
@@ -62,12 +68,7 @@
   <div class="inner">
     <p class="eyebrow">Eleição presidencial · 1º turno · 2026</p>
     <h1>A TV está mostrando o Brasil — ou só o pedaço que já chegou?</h1>
-    <p class="sub">A apuração começa no Sul e termina no Nordeste. Por isso o placar das primeiras horas quase sempre “vira”. Aqui você compara o que a TV mostra com o que as pesquisas previam para aquele pedaço, e estima o final.</p>
-    <div class="how">
-      <div><b>1. Copie a TV</b>Digite o % já apurado e os votos de Lula e Flávio, como estão no jornal.</div>
-      <div><b>2. Veja se faz sentido</b>O card “pesquisas neste pedaço” é o placar que as pesquisas dariam se só aqueles estados tivessem sido contados.</div>
-      <div><b>3. Olhe o palpite do final</b>Não use a TV como resultado. Use o “melhor palpite”: o que já saiu + o que ainda falta.</div>
-    </div>
+    <p class="sub">A apuração começa no Sul e termina no Nordeste. Compare o que a TV mostra com o que as pesquisas previam para aquele pedaço, e veja se dá para fechar no primeiro turno.</p>
   </div>
 </header>
 <div class="wrap">
@@ -84,7 +85,7 @@
         <button class="active" data-mode="ordem">Automático (Sul → Nordeste)</button>
         <button data-mode="manual">Eu sei o % de cada estado</button>
       </div>
-      <p class="tiny" id="modeHint">No automático, o site assume a ordem clássica da apuração. Se você tiver o TSE aberto, use o modo por estado.</p>
+      <p class="tiny" id="modeHint">No automático, o site assume a ordem clássica da apuração.</p>
     </div>
     <div class="card s7"><div class="k">Em uma frase</div><p class="call" id="veredito">—</p><p class="tiny" id="veredito2"></p></div>
     <div class="card s4"><div class="k"><span class="num">01</span> Na TV agora</div><div class="v" id="vTela">—</div><div class="bar" id="barTela"></div><p class="tiny" id="tTela"></p></div>
@@ -92,7 +93,6 @@
     <div class="card s4"><div class="k"><span class="num">03</span> Palpite simples para o final</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
     <div class="card s12">
       <div class="k">A TV está diferente do previsto?</div>
-      <p class="help">Positivo = melhor na TV do que as pesquisas deste pedaço. Negativo = pior. Até 2 pontos: normal. 2 a 4: fique atento. Mais que 4: ou chegaram estados diferentes, ou alguma pesquisa errou.</p>
       <div class="row3" style="margin-top:12px">
         <div><div class="k">Lula na TV vs previsto</div><div class="v" id="devL">—</div></div>
         <div><div class="k">Flávio na TV vs previsto</div><div class="v" id="devF">—</div></div>
@@ -102,23 +102,55 @@
     <div class="card s6"><div class="k"><span class="num">04</span> Melhor palpite para o final</div><div class="v" id="vStat">—</div><div class="bar" id="barStat"></div><p class="tiny" id="tStat"></p></div>
     <div class="card s6"><div class="k">Quanto o site acredita no desvio da TV</div><div class="v" id="vKappa">—</div><p class="tiny" id="tKappa"></p></div>
     <div class="card s12">
+      <div class="k">Rota para ganhar no primeiro turno</div>
+      <p class="help">Vence no 1º turno quem passa de 50% dos votos válidos (50% + 1 voto). Arraste: o site mostra o previsto na TV naquele instante e o mínimo para ainda conseguir fechar 50% + 1 quando o resto do país entrar. A faixa usa ±2,4 pontos nas pesquisas do que falta.</p>
+      <label style="margin-top:12px">Percentual já apurado</label>
+      <input id="slider1t" type="range" min="1" max="100" step="1" value="15" />
+      <div class="v" id="slider1tVal" style="font-size:1.2rem">15%</div>
+      <p class="tiny" id="t1tSum"></p>
+      <div class="pair" style="margin-top:14px">
+        <div class="cand lula">
+          <div class="k">Lula</div>
+          <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
+          <div class="v l" id="l1tExp">—</div>
+          <div class="help">Mínimo na TV para ainda poder terminar acima de 50%</div>
+          <div class="need l" id="l1tNeed">—</div>
+          <p class="tiny" id="l1tBand"></p>
+          <p class="tiny">Se o resto andasse como as pesquisas, o final dele seria <b id="l1tFinal">—</b></p>
+          <p><span id="l1tSt" class="chip warn">—</span> <span id="l1tStTxt" class="tiny"></span></p>
+        </div>
+        <div class="cand flavio">
+          <div class="k">Flávio</div>
+          <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
+          <div class="v f" id="f1tExp">—</div>
+          <div class="help">Mínimo na TV para ainda poder terminar acima de 50%</div>
+          <div class="need f" id="f1tNeed">—</div>
+          <p class="tiny" id="f1tBand"></p>
+          <p class="tiny">Se o resto andasse como as pesquisas, o final dele seria <b id="f1tFinal">—</b></p>
+          <p><span id="f1tSt" class="chip warn">—</span> <span id="f1tStTxt" class="tiny"></span></p>
+        </div>
+      </div>
+      <svg id="chart1t" viewBox="0 0 640 260" width="100%" height="260" role="img" aria-label="Rota para o primeiro turno"></svg>
+      <p class="tiny">Sólido: previsto na TV. Tracejado: mínimo para a conta dos 50% + 1 ainda fechar. Se o sólido fica abaixo do tracejado, não está na rota do 1º turno.</p>
+    </div>
+    <div class="card s12">
       <div class="k">Como o placar costuma andar durante a noite</div>
       <svg id="chart" viewBox="0 0 640 240" width="100%" height="240" role="img" aria-label="Gráfico da apuração"></svg>
-      <p class="tiny">Linhas: o que as pesquisas preveriam na TV se a apuração for Sul → Nordeste. Bolinhas cheias: a TV agora. Bolinhas vazias: o previsto para este momento. Tracejado: palpite para os 100%.</p>
     </div>
     <div class="card s12">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div class="k">Cada estado</div>
         <div><button id="btnReset">Voltar ao automático</button> <button id="btnZero">Começar do zero</button> <button id="btnFull">Marcar todos em 100%</button></div>
       </div>
-      <p class="tiny">Se um estado já tiver resultado fechado, preencha “na urna”. Aí o site para de usar a pesquisa daquele estado.</p>
+      <p class="tiny">Se um estado já tiver resultado fechado, preencha “na urna”.</p>
       <div style="overflow:auto;max-height:560px;margin-top:8px"><table id="tab"></table></div>
     </div>
-    <div class="card s6"><div class="k">Exemplo clássico</div><p class="tiny">Com 15% apurado, quase só o Sul entrou. Flávio à frente nisso é o esperado — não é o Brasil. Surpresa seria Lula ganhando com 15%, ou Flávio ainda ganhando com 85%, quando o Nordeste já deveria ter aparecido.</p></div>
-    <div class="card s6"><div class="k">De onde vêm os números</div><p class="tiny">Tamanho do eleitorado: TSE, julho de 2026. Pesquisas: última de cada estado no PollingData. Isto é uma leitura da apuração, não urna oficial e não endossa candidato.</p></div>
+    <div class="card s6"><div class="k">Exemplo clássico</div><p class="tiny">Com 15% apurado, quase só o Sul entrou. Flávio à frente nisso é o esperado — não é o Brasil.</p></div>
+    <div class="card s6"><div class="k">De onde vêm os números</div><p class="tiny">Eleitorado TSE jul/2026. Pesquisas PollingData por UF. Limiar: 50% + 1 dos válidos. Não é urna oficial.</p></div>
   </div>
   <footer>Ferramenta aberta · rconterb/nowcast-eleicoes-2026</footer>
 </div>
 <script src="app.js"></script>
+<script src="firstround.js"></script>
 </body>
 </html>
