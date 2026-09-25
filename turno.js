@@ -28,9 +28,24 @@ const T2POLL={
   MA:{l:50.6,f:49.4,src:'1º turno renormalizado · válidos entre os dois'}
 };
 DATA.forEach(d=>{ if(d.l1==null){ d.l1=d.l; d.f1=d.f; d.src1=d.src; } });
+function syncTelaFromPolls(){
+  if(window._telaTouched) return;
+  const pct=clamp(parseFloat(document.getElementById('pctBR').value)||0,0,100);
+  if(typeof mode==='undefined' || mode==='ordem') applyTypicalOrder(pct);
+  const e=expectedNow();
+  if(e.pct<0.2){
+    const m=mosaic();
+    document.getElementById('telaL').value=fmt(m.l);
+    document.getElementById('telaF').value=fmt(m.f);
+  } else {
+    document.getElementById('telaL').value=fmt(e.l);
+    document.getElementById('telaF').value=fmt(e.f);
+  }
+}
 function applyTurno(n){
   window.TURNO = n;
   window.TURNO_LABEL = n===2 ? '2º turno' : '1º turno';
+  window._telaTouched = false;
   DATA.forEach(d=>{
     if(n===2 && T2POLL[d.uf]){ d.l=T2POLL[d.uf].l; d.f=T2POLL[d.uf].f; d.src=T2POLL[d.uf].src; }
     else { d.l=d.l1; d.f=d.f1; d.src=d.src1; }
@@ -43,14 +58,14 @@ function applyTurno(n){
   if(sub) sub.textContent = n===2 ? 'Só restam dois. Números em votos válidos. A ordem continua Sul → Nordeste.' : 'A apuração começa no Sul e termina no Nordeste.';
   document.title = n===2 ? 'Como ler a apuração — 2º turno 2026' : 'Como ler a apuração — 2026';
   document.querySelectorAll('#pickTurno button').forEach(b=>b.classList.toggle('on', Number(b.dataset.t)===n));
-  if(document.getElementById('telaL') && !window._telaTouched){
-    document.getElementById('telaL').value = n===2 ? '38' : '28';
-    document.getElementById('telaF').value = n===2 ? '62' : '46';
-  }
+  const pctEl=document.getElementById('pctBR');
+  if(pctEl && (parseFloat(pctEl.value)>=99)) pctEl.value='15';
   if(typeof applyTypicalOrder==='function'){
     const pct=clamp(parseFloat(document.getElementById('pctBR').value)||15,0,100);
     if(typeof mode==='undefined' || mode==='ordem') applyTypicalOrder(pct);
   }
+  syncTelaFromPolls();
+  markTelaHint();
   relabelCards();
   paintMosaic();
   if(typeof paint==='function') paint(true);
@@ -58,6 +73,18 @@ function applyTurno(n){
   if(typeof renderTargets==='function') renderTargets();
   if(window.redrawNav) window.redrawNav();
   try { history.replaceState(null,'', n===2 ? '?turno=2' : '?turno=1'); } catch(e){}
+}
+function markTelaHint(){
+  ['telaL','telaF'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.title='Só preencha quando a urna real estiver na TV. Enquanto você não mexer, o site usa a pesquisa deste pedaço.';
+  });
+  const labL=document.querySelector('label[for="telaL"]');
+  document.querySelectorAll('label').forEach(l=>{
+    if(/Lula na TV/.test(l.textContent)) l.textContent=window._telaTouched?'Lula na TV (%)':'Lula na TV (%) — exemplo até você colar a urna';
+    if(/Flávio na TV/.test(l.textContent)) l.textContent=window._telaTouched?'Flávio na TV (%)':'Flávio na TV (%) — exemplo até você colar a urna';
+  });
 }
 function paintMosaic(){
   let box=document.getElementById('mosaicoBR');
@@ -72,11 +99,9 @@ function paintMosaic(){
     else host.insertBefore(box, host.firstChild);
   }
   const m=typeof mosaic==='function'?mosaic():{l:0,f:0};
-  box.innerHTML='<div class="k">Palpite das pesquisas para o BRASIL inteiro — '+ (window.TURNO_LABEL||'') +'</div>'+
+  box.innerHTML='<div class="k">Palpite das pesquisas para o BRASIL inteiro — '+(window.TURNO_LABEL||'')+'</div>'+
     '<div class="v"><span class="l">Lula '+fmt(m.l)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(m.f)+'%</span></div>'+
-    (window.TURNO===2
-      ? '<p class="help">Este é o número que importa para o final, enquanto pouca urna saiu. Se você viu Flávio com 65%, isso é Santa Catarina / Paraná no começo da noite — não o país. O mosaico do 2º turno (pesquisas estaduais × eleitorado) está empatado.</p>'
-      : '<p class="help">Média das pesquisas de cada estado ponderada pelo eleitorado. Não é a pesquisa nacional de um instituto só.</p>');
+    '<p class="help">Os campos “Lula/Flávio na TV” só devem ser o número da urna no dia. Se você deixar 100% apurado com um exemplo (38×62), o site copia isso como se a eleição tivesse acabado. Por isso o palpite do final virava 62%.</p>';
 }
 function relabelCards(){
   const t2=window.TURNO===2;
@@ -105,7 +130,8 @@ function ensurePicker(){
   }
   card.addEventListener('click',ev=>{ const b=ev.target.closest('button'); if(!b) return; applyTurno(Number(b.dataset.t)); });
 }
-['telaL','telaF'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input',()=>{ window._telaTouched=true; }); });
+['telaL','telaF'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input',()=>{ window._telaTouched=true; markTelaHint(); }); });
+document.getElementById('pctBR')&&document.getElementById('pctBR').addEventListener('input',()=>{ if(!window._telaTouched) syncTelaFromPolls(); });
 ensurePicker();
 (function(){
   const q=new URLSearchParams(location.search).get('turno');
