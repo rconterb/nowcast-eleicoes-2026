@@ -9,58 +9,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f3f0ea;
-    --paper: #fffcf7;
-    --ink: #1c1917;
-    --muted: #6b645c;
-    --line: #e4ddd3;
-    --lula: #b4232c;
-    --flavio: #1d4ed8;
-    --outros: #c4bbb0;
-    --ok: #157a4b;
-    --warn: #b45309;
-    --bad: #b4232c;
+    --bg: #f3f0ea; --paper: #fffcf7; --ink: #1c1917; --muted: #6b645c; --line: #e4ddd3;
+    --lula: #b4232c; --flavio: #1d4ed8; --outros: #c4bbb0; --ok: #157a4b; --warn: #b45309; --bad: #b4232c;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    color: var(--ink);
-    background: var(--bg);
-    font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-    line-height: 1.5;
-  }
+  body { margin: 0; color: var(--ink); background: var(--bg); font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; line-height: 1.5; }
   header { border-bottom: 1px solid var(--line); background: var(--paper); }
   .inner { max-width: 1120px; margin: 0 auto; padding: 28px 24px 22px; }
-  .eyebrow {
-    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--muted); font-weight: 600; margin: 0 0 8px;
-  }
-  h1 {
-    font-family: "Source Serif 4", Georgia, serif;
-    font-size: clamp(1.6rem, 3vw, 2.15rem);
-    font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin: 0 0 10px;
-  }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 8px; }
+  h1 { font-family: "Source Serif 4", Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin: 0 0 10px; }
   .sub { margin: 0; max-width: 46rem; color: var(--muted); }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 24px 64px; }
   .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-  .card {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 18px 18px 16px;
-  }
-  .s4 { grid-column: span 4; } .s5 { grid-column: span 5; }
-  .s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s12 { grid-column: span 12; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 16px; }
+  .s4 { grid-column: span 4; } .s5 { grid-column: span 5; } .s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s12 { grid-column: span 12; }
   @media (max-width: 900px) { .s4,.s5,.s6,.s7,.s12 { grid-column: span 12; } }
   .k { font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
   .v { font-size: 1.55rem; font-weight: 700; margin-top: 6px; letter-spacing: -.02em; }
   .bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: #efe8dc; margin-top: 12px; }
   .bar i { display: block; height: 100%; }
   label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
-  input[type=number], input[type=text] {
-    width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line);
-    border-radius: 8px; padding: 9px 10px; font-size: 1rem; font-family: inherit;
-  }
+  input[type=number], input[type=text] { width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font-size: 1rem; font-family: inherit; }
   input:focus { outline: 2px solid #c7d7f5; border-color: #93b4ea; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   @media (max-width: 640px) { .row3 { grid-template-columns: 1fr; } }
@@ -69,18 +38,12 @@
   th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
   th:first-child, td:first-child, td.lft, th.lft { text-align: left; }
   tr:hover td { background: #faf6ef; }
-  .l { color: var(--lula); font-weight: 600; }
-  .f { color: var(--flavio); font-weight: 600; }
+  .l { color: var(--lula); font-weight: 600; } .f { color: var(--flavio); font-weight: 600; }
   .chip { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; margin-right: 6px; }
-  .ok { background: #e4f6ec; color: var(--ok); }
-  .warn { background: #f8edd9; color: var(--warn); }
-  .bad { background: #f8e4e4; color: var(--bad); }
+  .ok { background: #e4f6ec; color: var(--ok); } .warn { background: #f8edd9; color: var(--warn); } .bad { background: #f8e4e4; color: var(--bad); }
   .muted { color: var(--muted); font-weight: 500; }
   .tiny { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
-  button {
-    background: #fff; color: var(--ink); border: 1px solid var(--line);
-    border-radius: 999px; padding: 7px 12px; cursor: pointer; font-size: 13px; font-family: inherit;
-  }
+  button { background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; cursor: pointer; font-size: 13px; font-family: inherit; }
   button:hover { background: #f4efe6; }
   .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
   .tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
@@ -95,7 +58,7 @@
   <div class="inner">
     <p class="eyebrow">Eleição presidencial · 1º turno · 2026</p>
     <h1>Tela, esperado e projeção final</h1>
-    <p class="sub">Digite o % já apurado e o placar da TV. O esperado usa a última pesquisa de cada estado no PollingData, só no pedaço que já deveria ter chegado. A virada da noite quase sempre é composição, não mudança de voto.</p>
+    <p class="sub">Digite o % já apurado e o placar da TV. O esperado é o que as pesquisas dariam nesse pedaço. A projeção final mistura o real já apurado com as pesquisas do que ainda falta.</p>
   </div>
 </header>
 <div class="wrap">
@@ -121,7 +84,7 @@
     </div>
     <div class="card s4"><div class="k"><span class="num">01</span> Tela agora</div><div class="v" id="vTela">—</div><div class="bar" id="barTela"></div><p class="tiny" id="tTela"></p></div>
     <div class="card s4"><div class="k"><span class="num">02</span> Esperado neste %</div><div class="v" id="vEsp">—</div><div class="bar" id="barEsp"></div><p class="tiny" id="tEsp"></p></div>
-    <div class="card s4"><div class="k"><span class="num">03</span> Projeção final</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
+    <div class="card s4"><div class="k"><span class="num">03</span> Projeção final (tela + o que falta)</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
     <div class="card s12">
       <div class="k">Desvio da tela em relação ao esperado</div>
       <div class="row3" style="margin-top:12px">
@@ -134,13 +97,9 @@
     <div class="card s12">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div class="k">Estados</div>
-        <div>
-          <button id="btnReset">Ordem típica</button>
-          <button id="btnZero">Zerar</button>
-          <button id="btnFull">100% todos</button>
-        </div>
+        <div><button id="btnReset">Ordem típica</button> <button id="btnZero">Zerar</button> <button id="btnFull">100% todos</button></div>
       </div>
-      <p class="tiny">No modo por estado, edite o % apurado. Lula real / Flávio real substituem a pesquisa da UF.</p>
+      <p class="tiny">No modo por estado, edite o % apurado. Lula real / Flávio real substituem a pesquisa da UF e entram inteiros na projeção.</p>
       <div style="overflow:auto;max-height:560px;margin-top:8px"><table id="tab"></table></div>
     </div>
     <div class="card s6"><div class="k">Como ler com 15% apurado</div><p class="tiny">Na ordem típica, 15% do Brasil é quase só o Sul. Flávio à frente nesse pedaço não é surpresa. Surpresa seria o sinal contrário — ou Flávio liderando com 85%, quando o Nordeste já deveria ter entrado.</p></div>
@@ -185,22 +144,16 @@ let mode = 'ordem';
 function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 function fmt(n){ return (Math.round(n*10)/10).toFixed(1); }
 function fmtPP(n){ return (n>=0?'+':'') + fmt(n) + ' pp'; }
-function barHTML(l,f){
-  const o = Math.max(0, 100-l-f);
-  return `<i style="width:${l}%;background:var(--lula)"></i><i style="width:${f}%;background:var(--flavio)"></i><i style="width:${o}%;background:var(--outros)"></i>`;
-}
+function barHTML(l,f){ const o = Math.max(0, 100-l-f); return `<i style="width:${l}%;background:var(--lula)"></i><i style="width:${f}%;background:var(--flavio)"></i><i style="width:${o}%;background:var(--outros)"></i>`; }
 function applyTypicalOrder(pctBR){
   let remain = TOTAL * clamp(pctBR,0,100) / 100;
   const sorted = [...DATA].sort((a,b)=>a.ordem-b.ordem);
   sorted.forEach(d => d.pct = 0);
-  for (const d of sorted){
-    if (remain <= 0) break;
-    const take = Math.min(d.e, remain);
-    d.pct = 100 * take / d.e;
-    remain -= take;
-  }
+  for (const d of sorted){ if (remain <= 0) break; const take = Math.min(d.e, remain); d.pct = 100 * take / d.e; remain -= take; }
 }
 function usedShare(d){ return d.e * (d.pct||0) / 100; }
+function remainShare(d){ return d.e * (1 - (d.pct||0)/100); }
+function hasReal(d){ return Number.isFinite(parseFloat(d.realL)) && Number.isFinite(parseFloat(d.realF)); }
 function lulaShare(d){ const real = parseFloat(d.realL); return Number.isFinite(real) ? real : d.l; }
 function flavShare(d){ const real = parseFloat(d.realF); return Number.isFinite(real) ? real : d.f; }
 function expectedNow(){
@@ -209,46 +162,54 @@ function expectedNow(){
   if (e<=0) return {e:0, pct:0, l:0, f:0, o:0};
   return {e, pct:100*e/TOTAL, l:100*l/e, f:100*f/e, o:100-(100*l/e)-(100*f/e)};
 }
+function pollsRemaining(){
+  let e=0,l=0,f=0;
+  DATA.forEach(d=>{ const w = remainShare(d); if (w<=0) return; e += w;
+    if (hasReal(d)) { l += w * parseFloat(d.realL) / 100; f += w * parseFloat(d.realF) / 100; }
+    else { l += w * d.l / 100; f += w * d.f / 100; }
+  });
+  if (e<=0) return {e:0, pct:0, l:0, f:0};
+  return {e, pct:100*e/TOTAL, l:100*l/e, f:100*f/e};
+}
 function projectedFinal(){
-  let l=0,f=0;
-  DATA.forEach(d=>{ l += d.e * lulaShare(d) / 100; f += d.e * flavShare(d) / 100; });
-  return {l:100*l/TOTAL, f:100*f/TOTAL, o:100-(100*l/TOTAL)-(100*f/TOTAL)};
+  const telaL = clamp(parseFloat(document.getElementById('telaL').value)||0,0,100);
+  const telaF = clamp(parseFloat(document.getElementById('telaF').value)||0,0,100);
+  let l=0, f=0, countedTela=0;
+  DATA.forEach(d=>{
+    const counted = usedShare(d), remain = remainShare(d);
+    if (hasReal(d)) { l += d.e * parseFloat(d.realL) / 100; f += d.e * parseFloat(d.realF) / 100; }
+    else { l += remain * d.l / 100; f += remain * d.f / 100; countedTela += counted; }
+  });
+  l += countedTela * telaL / 100; f += countedTela * telaF / 100;
+  const rest = pollsRemaining();
+  return { l:100*l/TOTAL, f:100*f/TOTAL, o:100-(100*l/TOTAL)-(100*f/TOTAL), countedPct: 100*countedTela/TOTAL, restPct: rest.pct, restL: rest.l, restF: rest.f };
 }
 function renderTable(){
   const rows = [...DATA].sort((a,b)=> (mode==='ordem'? a.ordem-b.ordem : b.e-a.e));
   const head = `<tr><th class="lft">UF</th><th class="lft">Região</th><th>Eleitores</th><th>Pesq. Lula</th><th>Pesq. Flávio</th><th>% apurado</th><th>Peso no parcial</th><th>Lula real</th><th>Flávio real</th><th class="lft">Fonte</th></tr>`;
   const body = rows.map(d=>{
-    const w = usedShare(d);
-    const peso = expectedNow().e ? 100*w/expectedNow().e : 0;
+    const w = usedShare(d); const peso = expectedNow().e ? 100*w/expectedNow().e : 0;
     return `<tr><td class="lft"><b>${d.uf}</b> ${d.nome}</td><td class="lft">${d.reg}</td><td>${d.e.toLocaleString('pt-BR')}</td><td class="l">${d.l}%</td><td class="f">${d.f}%</td><td><input type="number" min="0" max="100" step="1" value="${fmt(d.pct)}" data-uf="${d.uf}" data-k="pct"></td><td>${fmt(peso)}%</td><td><input type="number" min="0" max="100" step="0.1" placeholder="—" value="${d.realL}" data-uf="${d.uf}" data-k="realL"></td><td><input type="number" min="0" max="100" step="0.1" placeholder="—" value="${d.realF}" data-uf="${d.uf}" data-k="realF"></td><td class="lft muted">${d.src}</td></tr>`;
   }).join('');
   document.getElementById('tab').innerHTML = head+body;
   document.querySelectorAll('#tab input').forEach(inp=>{ inp.addEventListener('change', onCell); inp.addEventListener('input', onCell); });
 }
 function onCell(ev){
-  const d = DATA.find(x=>x.uf===ev.target.dataset.uf);
-  const k = ev.target.dataset.k;
-  const val = ev.target.value;
-  if (k==='pct'){
-    mode = 'manual'; setModeButtons();
-    d.pct = clamp(parseFloat(val)||0, 0, 100);
-    document.getElementById('pctBR').value = fmt(100 * DATA.reduce((s,x)=>s+usedShare(x),0) / TOTAL);
-  } else { d[k] = val === '' ? '' : val; }
+  const d = DATA.find(x=>x.uf===ev.target.dataset.uf); const k = ev.target.dataset.k; const val = ev.target.value;
+  if (k==='pct'){ mode = 'manual'; setModeButtons(); d.pct = clamp(parseFloat(val)||0, 0, 100); document.getElementById('pctBR').value = fmt(100 * DATA.reduce((s,x)=>s+usedShare(x),0) / TOTAL); }
+  else { d[k] = val === '' ? '' : val; }
   paint(false);
 }
 function setModeButtons(){
   document.querySelectorAll('#modeTabs button').forEach(b=> b.classList.toggle('active', b.dataset.mode===mode));
-  document.getElementById('modeHint').textContent = mode==='ordem'
-    ? 'O % do Brasil preenche os estados na ordem histórica (SC → PR → RS → SP…).'
-    : 'Você controla o % apurado de cada UF.';
+  document.getElementById('modeHint').textContent = mode==='ordem' ? 'O % do Brasil preenche os estados na ordem histórica (SC → PR → RS → SP…).' : 'Você controla o % apurado de cada UF.';
 }
 function paint(rebuildTable){
   const pctBR = clamp(parseFloat(document.getElementById('pctBR').value)||0,0,100);
   const telaL = clamp(parseFloat(document.getElementById('telaL').value)||0,0,100);
   const telaF = clamp(parseFloat(document.getElementById('telaF').value)||0,0,100);
   if (mode==='ordem') applyTypicalOrder(pctBR);
-  const exp = expectedNow();
-  const fin = projectedFinal();
+  const exp = expectedNow(); const fin = projectedFinal();
   document.getElementById('vTela').innerHTML = `<span class="l">${fmt(telaL)}%</span> <span class="muted">×</span> <span class="f">${fmt(telaF)}%</span>`;
   document.getElementById('barTela').innerHTML = barHTML(telaL,telaF);
   document.getElementById('tTela').textContent = `Outros na tela ${fmt(Math.max(0,100-telaL-telaF))}%`;
@@ -257,7 +218,7 @@ function paint(rebuildTable){
   document.getElementById('tEsp').textContent = `Pedaço modelado: ${fmt(exp.pct)}% do eleitorado`;
   document.getElementById('vFin').innerHTML = `<span class="l">${fmt(fin.l)}%</span> <span class="muted">×</span> <span class="f">${fmt(fin.f)}%</span>`;
   document.getElementById('barFin').innerHTML = barHTML(fin.l,fin.f);
-  document.getElementById('tFin').textContent = `Mosaico UF · agregador nacional PD: Lula ${PD_NACIONAL.l}% × Flávio ${PD_NACIONAL.f}% (${PD_NACIONAL.data})`;
+  document.getElementById('tFin').textContent = `${fmt(fin.countedPct)}% da tela (${fmt(telaL)} × ${fmt(telaF)}) + ${fmt(fin.restPct)}% que falta (pesquisas ${fmt(fin.restL)} × ${fmt(fin.restF)})`;
   const dL = telaL - exp.l, dF = telaF - exp.f;
   const elL = document.getElementById('devL'), elF = document.getElementById('devF');
   elL.textContent = fmtPP(dL); elF.textContent = fmtPP(dF);
@@ -282,12 +243,7 @@ function paint(rebuildTable){
 document.getElementById('pctBR').addEventListener('input', ()=>{ if (mode==='ordem') paint(true); else paint(false); });
 document.getElementById('telaL').addEventListener('input', ()=>paint(false));
 document.getElementById('telaF').addEventListener('input', ()=>paint(false));
-document.getElementById('modeTabs').addEventListener('click', ev=>{
-  const b = ev.target.closest('button'); if(!b) return;
-  mode = b.dataset.mode; setModeButtons();
-  if (mode==='ordem') applyTypicalOrder(clamp(parseFloat(document.getElementById('pctBR').value)||0,0,100));
-  paint(true);
-});
+document.getElementById('modeTabs').addEventListener('click', ev=>{ const b = ev.target.closest('button'); if(!b) return; mode = b.dataset.mode; setModeButtons(); if (mode==='ordem') applyTypicalOrder(clamp(parseFloat(document.getElementById('pctBR').value)||0,0,100)); paint(true); });
 document.getElementById('btnReset').onclick = ()=>{ mode='ordem'; setModeButtons(); applyTypicalOrder(clamp(parseFloat(document.getElementById('pctBR').value)||0,0,100)); paint(true); };
 document.getElementById('btnZero').onclick = ()=>{ mode='manual'; setModeButtons(); DATA.forEach(d=>d.pct=0); document.getElementById('pctBR').value='0'; paint(true); };
 document.getElementById('btnFull').onclick = ()=>{ mode='manual'; setModeButtons(); DATA.forEach(d=>d.pct=100); document.getElementById('pctBR').value='100'; paint(true); };
