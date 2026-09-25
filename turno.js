@@ -40,7 +40,7 @@ function applyTurno(n){
   const sub=document.querySelector('header .sub');
   if(eye) eye.textContent = n===2 ? 'Eleição presidencial · 2º turno · 2026' : 'Eleição presidencial · 1º turno · 2026';
   if(h1) h1.textContent = n===2 ? 'No segundo turno a TV também mente no começo da noite' : 'A TV está mostrando o Brasil — ou só o pedaço que já chegou?';
-  if(sub) sub.textContent = n===2 ? 'Só restam dois. Números em votos válidos. A ordem continua Sul → Nordeste e o avanço até 50% + 1 continua amortecido.' : 'A apuração começa no Sul e termina no Nordeste. Compare o que a TV mostra com o que as pesquisas previam para aquele pedaço.';
+  if(sub) sub.textContent = n===2 ? 'Só restam dois. Números em votos válidos. A ordem continua Sul → Nordeste.' : 'A apuração começa no Sul e termina no Nordeste.';
   document.title = n===2 ? 'Como ler a apuração — 2º turno 2026' : 'Como ler a apuração — 2026';
   document.querySelectorAll('#pickTurno button').forEach(b=>b.classList.toggle('on', Number(b.dataset.t)===n));
   if(document.getElementById('telaL') && !window._telaTouched){
@@ -49,12 +49,45 @@ function applyTurno(n){
   }
   if(typeof applyTypicalOrder==='function'){
     const pct=clamp(parseFloat(document.getElementById('pctBR').value)||15,0,100);
-    if(mode==='ordem') applyTypicalOrder(pct);
+    if(typeof mode==='undefined' || mode==='ordem') applyTypicalOrder(pct);
   }
+  relabelCards();
+  paintMosaic();
   if(typeof paint==='function') paint(true);
   if(typeof updateFirstRound==='function') updateFirstRound();
   if(typeof renderTargets==='function') renderTargets();
+  if(window.redrawNav) window.redrawNav();
   try { history.replaceState(null,'', n===2 ? '?turno=2' : '?turno=1'); } catch(e){}
+}
+function paintMosaic(){
+  let box=document.getElementById('mosaicoBR');
+  const host=document.querySelector('.wrap .grid');
+  if(!host) return;
+  if(!box){
+    box=document.createElement('div');
+    box.className='card s12';
+    box.id='mosaicoBR';
+    const pick=document.getElementById('pickTurno');
+    if(pick&&pick.nextSibling) host.insertBefore(box, pick.nextSibling);
+    else host.insertBefore(box, host.firstChild);
+  }
+  const m=typeof mosaic==='function'?mosaic():{l:0,f:0};
+  box.innerHTML='<div class="k">Palpite das pesquisas para o BRASIL inteiro — '+ (window.TURNO_LABEL||'') +'</div>'+
+    '<div class="v"><span class="l">Lula '+fmt(m.l)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(m.f)+'%</span></div>'+
+    (window.TURNO===2
+      ? '<p class="help">Este é o número que importa para o final, enquanto pouca urna saiu. Se você viu Flávio com 65%, isso é Santa Catarina / Paraná no começo da noite — não o país. O mosaico do 2º turno (pesquisas estaduais × eleitorado) está empatado.</p>'
+      : '<p class="help">Média das pesquisas de cada estado ponderada pelo eleitorado. Não é a pesquisa nacional de um instituto só.</p>');
+}
+function relabelCards(){
+  const t2=window.TURNO===2;
+  document.querySelectorAll('.card .k').forEach(el=>{
+    const t=el.textContent.trim();
+    if(/01/.test(t)) el.innerHTML='<span class="num">01</span> Na TV agora — só o pedaço apurado';
+    if(/02/.test(t)) el.innerHTML='<span class="num">02</span> Pesquisas só neste pedaço — ainda não é o Brasil';
+    if(/03/.test(t)) el.innerHTML='<span class="num">03</span> Palpite para o BRASIL inteiro';
+    if(/04/.test(t)) el.innerHTML='<span class="num">04</span> Palpite para o BRASIL (com o desvio da TV)';
+    if(/Rota para ganhar/.test(t)) el.textContent=t2?'Rota para ganhar o 2º turno':'Rota para ganhar o 1º turno';
+  });
 }
 function ensurePicker(){
   if(document.getElementById('pickTurno')) return;
@@ -63,7 +96,7 @@ function ensurePicker(){
   const card=document.createElement('div');
   card.className='card s12';
   card.id='pickTurno';
-  card.innerHTML='<div class="k">Qual análise você quer ver?</div><p class="help">Escolha antes de mexer nos números. As pesquisas e o que cada estado precisa fazer mudam.</p><div class="pick"><button type="button" data-t="1">1º turno</button><button type="button" data-t="2">2º turno</button></div>';
+  card.innerHTML='<div class="k">Qual análise você quer ver?</div><p class="help">Escolha primeiro. As pesquisas mudam.</p><div class="pick"><button type="button" data-t="1">1º turno</button><button type="button" data-t="2">2º turno</button></div>';
   wrap.insertBefore(card, wrap.firstChild);
   if(!document.getElementById('pickcss')){
     const s=document.createElement('style'); s.id='pickcss';
