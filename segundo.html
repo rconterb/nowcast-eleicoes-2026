@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Como ler a apuração — 2º turno 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg:#f3f0ea; --paper:#fffcf7; --ink:#1c1917; --muted:#6b645c; --line:#e4ddd3; --lula:#b4232c; --flavio:#1d4ed8; --outros:#c4bbb0; --ok:#157a4b; --warn:#b45309; --bad:#b4232c; }
+  * { box-sizing: border-box; }
+  body { margin:0; color:var(--ink); background:var(--bg); font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif; line-height:1.5; }
+  header { border-bottom:1px solid var(--line); background:var(--paper); }
+  .inner { max-width:1120px; margin:0 auto; padding:28px 24px 22px; }
+  .eyebrow { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:600; margin:0 0 8px; }
+  h1 { font-family:"Source Serif 4",Georgia,serif; font-size:clamp(1.55rem,3vw,2.1rem); font-weight:700; letter-spacing:-.03em; line-height:1.15; margin:0 0 10px; }
+  .sub { margin:0; max-width:46rem; color:var(--muted); }
+  .nav { display:flex; gap:8px; margin:0 0 14px; }
+  .nav a { font-size:13px; text-decoration:none; color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:5px 12px; background:#fff; }
+  .nav a.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .wrap { max-width:1120px; margin:0 auto; padding:20px 24px 64px; }
+  .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+  .card { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px; }
+  .s4{grid-column:span 4;} .s5{grid-column:span 5;} .s6{grid-column:span 6;} .s7{grid-column:span 7;} .s12{grid-column:span 12;}
+  @media (max-width:900px){ .s4,.s5,.s6,.s7,.s12{grid-column:span 12;} }
+  .k { font-size:12px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:600; }
+  .v { font-size:1.55rem; font-weight:700; margin-top:6px; letter-spacing:-.02em; }
+  .bar { display:flex; height:10px; border-radius:99px; overflow:hidden; background:#efe8dc; margin-top:12px; }
+  .bar i { display:block; height:100%; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:5px; }
+  input[type=number] { width:100%; background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-size:1rem; font-family:inherit; }
+  input[type=range] { width:100%; accent-color:#1c1917; height:28px; }
+  input:focus { outline:2px solid #c7d7f5; border-color:#93b4ea; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:800px){ .row3,.pair{grid-template-columns:1fr;} }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { padding:9px 8px; border-bottom:1px solid var(--line); text-align:right; }
+  th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
+  th:first-child, td:first-child, td.lft, th.lft { text-align:left; }
+  tr:hover td { background:#faf6ef; }
+  .l { color:var(--lula); font-weight:600; } .f { color:var(--flavio); font-weight:600; }
+  .chip { display:inline-block; padding:2px 9px; border-radius:99px; font-size:12px; font-weight:700; margin-right:6px; }
+  .ok { background:#e4f6ec; color:var(--ok); } .warn { background:#f8edd9; color:var(--warn); } .bad { background:#f8e4e4; color:var(--bad); }
+  .tiny { font-size:13.5px; color:var(--muted); margin:10px 0 0; }
+  button { background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer; font-size:13px; font-family:inherit; }
+  button:hover { background:#f4efe6; }
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 0; }
+  .tabs button.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+  td input { width:72px; padding:5px 6px; font-size:13px; text-align:right; }
+  .call { font-size:1.12rem; margin:10px 0 0; line-height:1.4; }
+  .num { font-family:"Source Serif 4",Georgia,serif; color:var(--muted); font-size:13px; margin-right:6px; }
+  footer { color:var(--muted); font-size:13px; margin-top:8px; }
+  svg text { font-family:"Source Sans 3",system-ui,sans-serif; fill:var(--muted); font-size:11px; }
+  svg .gridline { stroke:#efe8dc; stroke-width:1; }
+  .help { margin:8px 0 0; font-size:13.5px; color:var(--muted); }
+  .cand { border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .cand.lula { border-top:3px solid var(--lula); }
+  .cand.flavio { border-top:3px solid var(--flavio); }
+  .need { font-size:2rem; font-weight:700; letter-spacing:-.03em; margin:4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div class="nav"><a href="./index.html">1º turno</a><a class="on" href="./segundo.html">2º turno</a></div>
+    <p class="eyebrow">Eleição presidencial · 2º turno · 2026</p>
+    <h1>No segundo turno a TV também mente no começo da noite</h1>
+    <p class="sub">Só restam dois. Os números são votos válidos. A ordem da apuração continua Sul → Nordeste, o avanço até 50% + 1 continua amortecido, e cada estado tem o % que precisaria fazer para um deles levar.</p>
+  </div>
+</header>
+<div class="wrap">
+  <div class="grid">
+    <div class="card s5">
+      <div class="k">O que a TV está mostrando agora</div>
+      <div class="row3" style="margin-top:12px">
+        <div><label>Brasil já apurado (%)</label><input id="pctBR" type="number" min="0" max="100" step="0.1" value="15" /></div>
+        <div><label>Lula na TV (%)</label><input id="telaL" type="number" min="0" max="100" step="0.1" value="38" /></div>
+        <div><label>Flávio na TV (%)</label><input id="telaF" type="number" min="0" max="100" step="0.1" value="62" /></div>
+      </div>
+      <label style="margin-top:14px">Como o site decide quais estados já entraram</label>
+      <div class="tabs" id="modeTabs">
+        <button class="active" data-mode="ordem">Automático (Sul → Nordeste)</button>
+        <button data-mode="manual">Eu sei o % de cada estado</button>
+      </div>
+      <p class="tiny" id="modeHint">No automático, o site assume a ordem clássica da apuração.</p>
+    </div>
+    <div class="card s7"><div class="k">Em uma frase</div><p class="call" id="veredito">—</p><p class="tiny" id="veredito2"></p></div>
+    <div class="card s4"><div class="k"><span class="num">01</span> Na TV agora</div><div class="v" id="vTela">—</div><div class="bar" id="barTela"></div><p class="tiny" id="tTela"></p></div>
+    <div class="card s4"><div class="k"><span class="num">02</span> Pesquisas neste pedaço</div><div class="v" id="vEsp">—</div><div class="bar" id="barEsp"></div><p class="tiny" id="tEsp"></p></div>
+    <div class="card s4"><div class="k"><span class="num">03</span> Palpite simples para o final</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
+    <div class="card s12">
+      <div class="k">A TV está diferente do previsto?</div>
+      <div class="row3" style="margin-top:12px">
+        <div><div class="k">Lula na TV vs previsto</div><div class="v" id="devL">—</div></div>
+        <div><div class="k">Flávio na TV vs previsto</div><div class="v" id="devF">—</div></div>
+        <div><div class="k">Agora × palpite do fim</div><div class="v" id="devFinal" style="font-size:1.05rem">—</div></div>
+      </div>
+    </div>
+    <div class="card s6"><div class="k"><span class="num">04</span> Melhor palpite para o final</div><div class="v" id="vStat">—</div><div class="bar" id="barStat"></div><p class="tiny" id="tStat"></p></div>
+    <div class="card s6"><div class="k">Quanto o site acredita no desvio da TV</div><div class="v" id="vKappa">—</div><p class="tiny" id="tKappa"></p></div>
+    <div class="card s12">
+      <div class="k">Rota para ganhar o segundo turno</div>
+      <p class="help">No 2º turno vence quem passa de 50% dos válidos. O avanço até os 50% nasce na base e chega fraco no polo oposto — o mesmo mapa de 2018 e 2022. Abaixo: bandeira e o % de cada estado.</p>
+      <label style="margin-top:12px">Percentual já apurado</label>
+      <input id="slider1t" type="range" min="1" max="100" step="1" value="15" />
+      <div class="v" id="slider1tVal" style="font-size:1.2rem">15%</div>
+      <p class="tiny" id="t1tSum"></p>
+      <div class="pair" style="margin-top:14px">
+        <div class="cand lula">
+          <div class="k">Lula</div>
+          <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
+          <div class="v l" id="l1tExp">—</div>
+          <div class="help">TV se o avanço a 50% já valesse, com mais peso na base dele</div>
+          <div class="need l" id="l1tNeed">—</div>
+          <p class="tiny" id="l1tBand"></p>
+          <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="l1tFinal">—</b></p>
+          <p><span id="l1tSt" class="chip warn">—</span> <span id="l1tStTxt" class="tiny"></span></p>
+        </div>
+        <div class="cand flavio">
+          <div class="k">Flávio</div>
+          <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
+          <div class="v f" id="f1tExp">—</div>
+          <div class="help">TV se o avanço a 50% já valesse, com mais peso na base dele</div>
+          <div class="need f" id="f1tNeed">—</div>
+          <p class="tiny" id="f1tBand"></p>
+          <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="f1tFinal">—</b></p>
+          <p><span id="f1tSt" class="chip warn">—</span> <span id="f1tStTxt" class="tiny"></span></p>
+        </div>
+      </div>
+      <svg id="chart1t" viewBox="0 0 640 260" width="100%" height="260" role="img" aria-label="Rota para o segundo turno"></svg>
+    </div>
+    <div class="card s12">
+      <div class="k">Como o placar costuma andar durante a noite</div>
+      <svg id="chart" viewBox="0 0 640 240" width="100%" height="240" role="img" aria-label="Gráfico da apuração"></svg>
+    </div>
+    <div class="card s12">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="k">Cada estado</div>
+        <div><button id="btnReset">Voltar ao automático</button> <button id="btnZero">Começar do zero</button> <button id="btnFull">Marcar todos em 100%</button></div>
+      </div>
+      <p class="tiny">SP, RJ, MG, DF e PE usam Quaest de 2º turno (válidos). Os outros estados são o 1º turno renormalizado entre os dois. Se um estado já tiver urna fechada, preencha “na urna”.</p>
+      <div style="overflow:auto;max-height:560px;margin-top:8px"><table id="tab"></table></div>
+    </div>
+  </div>
+  <footer>Ferramenta aberta · rconterb/nowcast-eleicoes-2026 · votos válidos</footer>
+</div>
+<script src="app.js"></script>
+<script src="firstround.js"></script>
+<script src="targets.js"></script>
+<script src="data2.js"></script>
+<script src="fundamento.js"></script>
+</body>
+</html>
