@@ -40,7 +40,6 @@
   .l { color:var(--lula); font-weight:600; } .f { color:var(--flavio); font-weight:600; }
   .chip { display:inline-block; padding:2px 9px; border-radius:99px; font-size:12px; font-weight:700; margin-right:6px; }
   .ok { background:#e4f6ec; color:var(--ok); } .warn { background:#f8edd9; color:var(--warn); } .bad { background:#f8e4e4; color:var(--bad); }
-  .muted { color:var(--muted); font-weight:500; }
   .tiny { font-size:13.5px; color:var(--muted); margin:10px 0 0; }
   button { background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer; font-size:13px; font-family:inherit; }
   button:hover { background:#f4efe6; }
@@ -52,10 +51,6 @@
   footer { color:var(--muted); font-size:13px; margin-top:8px; }
   svg text { font-family:"Source Sans 3",system-ui,sans-serif; fill:var(--muted); font-size:11px; }
   svg .gridline { stroke:#efe8dc; stroke-width:1; }
-  .how { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0 0; }
-  @media (max-width:800px){ .how{grid-template-columns:1fr;} }
-  .how div { background:#f7f2ea; border-radius:10px; padding:12px 14px; }
-  .how b { display:block; margin-bottom:4px; }
   .help { margin:8px 0 0; font-size:13.5px; color:var(--muted); }
   .cand { border:1px solid var(--line); border-radius:10px; padding:14px; }
   .cand.lula { border-top:3px solid var(--lula); }
@@ -103,7 +98,7 @@
     <div class="card s6"><div class="k">Quanto o site acredita no desvio da TV</div><div class="v" id="vKappa">—</div><p class="tiny" id="tKappa"></p></div>
     <div class="card s12">
       <div class="k">Rota para ganhar no primeiro turno</div>
-      <p class="help">Vence no 1º turno quem passa de 50% dos votos válidos (50% + 1 voto). Arraste: o site mostra o previsto na TV naquele instante e o mínimo para ainda conseguir fechar 50% + 1 quando o resto do país entrar. A faixa usa ±2,4 pontos nas pesquisas do que falta.</p>
+      <p class="help">Vence no 1º turno quem passa de 50% dos válidos. O avanço até os 50% é espalhado pelo país inteiro — também na Bahia, em Pernambuco, no Ceará — não concentrado no pedaço que já saiu. Por isso não aparece mais um 80% na TV.</p>
       <label style="margin-top:12px">Percentual já apurado</label>
       <input id="slider1t" type="range" min="1" max="100" step="1" value="15" />
       <div class="v" id="slider1tVal" style="font-size:1.2rem">15%</div>
@@ -113,25 +108,25 @@
           <div class="k">Lula</div>
           <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
           <div class="v l" id="l1tExp">—</div>
-          <div class="help">Mínimo na TV para ainda poder terminar acima de 50%</div>
+          <div class="help">TV se o avanço a 50% já valesse em todo o país</div>
           <div class="need l" id="l1tNeed">—</div>
           <p class="tiny" id="l1tBand"></p>
-          <p class="tiny">Se o resto andasse como as pesquisas, o final dele seria <b id="l1tFinal">—</b></p>
+          <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="l1tFinal">—</b></p>
           <p><span id="l1tSt" class="chip warn">—</span> <span id="l1tStTxt" class="tiny"></span></p>
         </div>
         <div class="cand flavio">
           <div class="k">Flávio</div>
           <div class="help">Previsto na TV agora, pelas pesquisas deste pedaço</div>
           <div class="v f" id="f1tExp">—</div>
-          <div class="help">Mínimo na TV para ainda poder terminar acima de 50%</div>
+          <div class="help">TV se o avanço a 50% já valesse em todo o país</div>
           <div class="need f" id="f1tNeed">—</div>
           <p class="tiny" id="f1tBand"></p>
-          <p class="tiny">Se o resto andasse como as pesquisas, o final dele seria <b id="f1tFinal">—</b></p>
+          <p class="tiny">Com o número da TV de agora, o resto precisaria render, além da pesquisa: <b id="f1tFinal">—</b></p>
           <p><span id="f1tSt" class="chip warn">—</span> <span id="f1tStTxt" class="tiny"></span></p>
         </div>
       </div>
       <svg id="chart1t" viewBox="0 0 640 260" width="100%" height="260" role="img" aria-label="Rota para o primeiro turno"></svg>
-      <p class="tiny">Sólido: previsto na TV. Tracejado: mínimo para a conta dos 50% + 1 ainda fechar. Se o sólido fica abaixo do tracejado, não está na rota do 1º turno.</p>
+      <p class="tiny">Sólido: previsto nas pesquisas. Tracejado: a TV se o mesmo avanço até 50% já estivesse valendo em todo o país, inclusive nos estados fracos.</p>
     </div>
     <div class="card s12">
       <div class="k">Como o placar costuma andar durante a noite</div>
