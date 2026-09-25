@@ -8,6 +8,24 @@ function mixState(uf,s){
   const t=(s+1)/2;
   return {l:lerp(a[0],b[0],t), f:lerp(a[1],b[1],t)};
 }
+function setPctApurado(pct, fromSlider){
+  pct=clamp(pct,0,100);
+  const box=document.getElementById('pctBR');
+  const night=document.getElementById('night');
+  const nightVal=document.getElementById('nightVal');
+  const s1=document.getElementById('slider1t');
+  if(box && (!fromSlider || Math.abs((parseFloat(box.value)||0)-pct)>0.05)) box.value=fmt(pct);
+  if(night && Math.abs((parseFloat(night.value)||0)-pct)>0.05) night.value=pct;
+  if(nightVal) nightVal.textContent=fmt(pct)+'% do Brasil apurado';
+  if(s1 && Math.abs((parseFloat(s1.value)||0)-pct)>0.05) s1.value=pct;
+  if(typeof mode==='undefined' || mode==='ordem'){
+    if(typeof applyTypicalOrder==='function') applyTypicalOrder(pct);
+  }
+  if(typeof syncTelaFromPolls==='function' && !window._telaTouched) syncTelaFromPolls();
+  if(typeof paint==='function') paint(true);
+  if(typeof updateFirstRound==='function') updateFirstRound();
+  paintTrend();
+}
 function applySwing(s){
   window.SWING=s;
   DATA.forEach(d=>{
@@ -15,7 +33,7 @@ function applySwing(s){
     if(!m) return;
     d.l=Math.round(m.l*10)/10;
     d.f=Math.round(m.f*10)/10;
-    d.src='mapa '+(s< -0.33?'2018':s>0.33?'2022':'mistura 18/22')+' · 2º turno TSE';
+    d.src='mapa '+(s<-0.33?'2018':s>0.33?'2022':'mistura 18/22')+' · 2º turno TSE';
   });
   const sl=document.getElementById('swingVal');
   const lab=document.getElementById('swingLab');
@@ -31,6 +49,7 @@ function applySwing(s){
   if(typeof paint==='function') paint(true);
   if(typeof updateFirstRound==='function') updateFirstRound();
   if(typeof renderTargets==='function') renderTargets();
+  paintTrend();
 }
 function trendLine(){
   const telaL=clamp(parseFloat(document.getElementById('telaL').value)||0,0,100);
@@ -39,8 +58,8 @@ function trendLine(){
   const w=clamp(exp.pct/100,0,1);
   const k=w/(w+0.28);
   const m=mosaic();
-  const finL=w*telaL+(1-w)*(m.l + k*(telaL-exp.l));
-  const finF=w*telaF+(1-w)*(m.f + k*(telaF-exp.f));
+  const finL=w*telaL+(1-w)*(m.l+k*(telaL-exp.l));
+  const finF=w*telaF+(1-w)*(m.f+k*(telaF-exp.f));
   return {exp,w,k,dL:telaL-exp.l,dF:telaF-exp.f,finL,finF,m};
 }
 function paintTrend(){
@@ -50,10 +69,13 @@ function paintTrend(){
   const lado=t.dF>1.2?'A TV está melhor para o Flávio do que o mapa neste pedaço ('+fmtPP(t.dF)+'). A tendência empurra o final um pouco para ele.':
              t.dL>1.2?'A TV está melhor para o Lula do que o mapa neste pedaço ('+fmtPP(t.dL)+'). A tendência empurra o final um pouco para ele.':
              'A TV está alinhada com o mapa neste pedaço. Sem tendência extra.';
-  box.innerHTML='<div class="k">Com '+fmt(t.w*100)+'% apurado neste mapa</div>'+
+  const quem=t.finL>=t.finF?'Lula':'Flávio';
+  const marg=Math.abs(t.finL-t.finF);
+  box.innerHTML='<div class="k">O que a TV deveria mostrar agora</div>'+
     '<div class="v"><span class="l">Lula '+fmt(t.exp.l)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(t.exp.f)+'%</span></div>'+
-    '<p class="help">Isso é o que o mapa 2018/2022 manda a TV mostrar agora. '+lado+'</p>'+
-    '<p class="help">Tendência para o final (mapa do resto + desvio da TV encolhido): <b class="l">Lula '+fmt(t.finL)+'%</b> × <b class="f">Flávio '+fmt(t.finF)+'%</b>.</p>';
+    '<p class="help">'+fmt(t.w*100)+'% apurado neste mapa. '+lado+'</p>'+
+    '<p class="help">Tendência para o final: <b class="l">Lula '+fmt(t.finL)+'%</b> × <b class="f">Flávio '+fmt(t.finF)+'%</b> — '+
+    (marg<0.4?'empate':quem+' por '+fmt(marg)+' pp')+'.</p>';
 }
 function ensureSwing(){
   if(document.getElementById('swingCard')) return;
@@ -62,12 +84,22 @@ function ensureSwing(){
   const card=document.createElement('div');
   card.className='card s12';
   card.id='swingCard';
-  card.innerHTML='<div class="k">E se 2026 parecer 2018 ou 2022?</div>'+
-    '<p class="help">Arraste. Esquerda = mapa do 2º turno de 2018 (ganhou Bolsonaro, 55%). Direita = mapa de 2022 (ganhou Lula, 51%). Cada estado muda no mesmo ritmo. O % apurado usa esse mapa para dizer o que a TV deveria mostrar.</p>'+
+  card.innerHTML='<div class="k">Dois controles para acompanhar a noite</div>'+
+    '<p class="help">Primeiro o mapa (2018 puxa Flávio, 2022 puxa Lula). Depois o % já apurado — arraste conforme a TV for soltando número. A ordem continua Sul → Nordeste.</p>'+
+    '<div class="k" style="margin-top:14px">1. Que eleição 2026 parece?</div>'+
     '<div id="swingEra" class="pick" style="margin:10px 0"><button type="button" data-era="18">2018 · Flávio</button><button type="button" data-era="mid">meio</button><button type="button" data-era="22">2022 · Lula</button></div>'+
     '<input id="swing" type="range" min="-1" max="1" step="0.01" value="0" />'+
     '<div class="v" id="swingVal" style="font-size:1.15rem">meio-termo</div>'+
     '<p class="tiny" id="swingLab"></p>'+
+    '<div class="k" style="margin-top:18px">2. Quanto do Brasil já foi apurado?</div>'+
+    '<div id="nightBtns" class="pick" style="margin:10px 0">'+
+      '<button type="button" data-p="5">5%</button><button type="button" data-p="15">15%</button>'+
+      '<button type="button" data-p="30">30%</button><button type="button" data-p="50">50%</button>'+
+      '<button type="button" data-p="75">75%</button><button type="button" data-p="100">100%</button>'+
+    '</div>'+
+    '<input id="night" type="range" min="1" max="100" step="1" value="15" />'+
+    '<div class="v" id="nightVal" style="font-size:1.15rem">15% do Brasil apurado</div>'+
+    '<p class="tiny">5% ≈ só o Sul. 30% já começa São Paulo. 60%+ o Nordeste pesa. 100% é o mapa inteiro.</p>'+
     '<div id="swingTrend" style="margin-top:12px"></div>';
   const mos=document.getElementById('mosaicoBR');
   if(mos&&mos.nextSibling) host.insertBefore(card, mos.nextSibling);
@@ -76,14 +108,20 @@ function ensureSwing(){
     if(pick&&pick.nextSibling) host.insertBefore(card, pick.nextSibling);
     else host.insertBefore(card, host.firstChild);
   }
-  const sl=document.getElementById('swing');
-  sl.addEventListener('input',()=>applySwing(parseFloat(sl.value)));
+  document.getElementById('swing').addEventListener('input',ev=>applySwing(parseFloat(ev.target.value)));
   document.getElementById('swingEra').addEventListener('click',ev=>{
     const b=ev.target.closest('button'); if(!b) return;
     const v=b.dataset.era==='18'?-1:b.dataset.era==='22'?1:0;
-    sl.value=v; applySwing(v);
+    document.getElementById('swing').value=v; applySwing(v);
   });
-  ['pctBR','telaL','telaF'].forEach(id=>{
+  document.getElementById('night').addEventListener('input',ev=>setPctApurado(parseFloat(ev.target.value), true));
+  document.getElementById('nightBtns').addEventListener('click',ev=>{
+    const b=ev.target.closest('button'); if(!b) return;
+    setPctApurado(parseFloat(b.dataset.p), true);
+  });
+  const pct=document.getElementById('pctBR');
+  if(pct) pct.addEventListener('input',()=>setPctApurado(parseFloat(pct.value)||0, false));
+  ['telaL','telaF'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.addEventListener('input',paintTrend);
   });
@@ -95,3 +133,4 @@ function ensureSwing(){
 }
 ensureSwing();
 applySwing(0);
+setPctApurado(clamp(parseFloat(document.getElementById('pctBR').value)||15,0,100), true);
