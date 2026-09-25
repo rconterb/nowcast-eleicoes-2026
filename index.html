@@ -3,134 +3,150 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nowcast eleitoral 2026 — tela × esperado × final</title>
+<title>Nowcast eleitoral 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0c1016;
-    --card: #161d27;
-    --card2: #1c2532;
-    --line: #2b3646;
-    --text: #eef3f8;
-    --muted: #8fa0b5;
-    --lula: #e11d48;
-    --flavio: #2563eb;
-    --outros: #64748b;
-    --ok: #34d399;
-    --warn: #fbbf24;
-    --bad: #fb7185;
+    --bg: #f3f0ea;
+    --paper: #fffcf7;
+    --ink: #1c1917;
+    --muted: #6b645c;
+    --line: #e4ddd3;
+    --lula: #b4232c;
+    --flavio: #1d4ed8;
+    --outros: #c4bbb0;
+    --ok: #157a4b;
+    --warn: #b45309;
+    --bad: #b4232c;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: "Segoe UI", system-ui, sans-serif;
-    background: radial-gradient(900px 500px at 80% -10%, #1a2740 0%, var(--bg) 50%);
-    color: var(--text);
-    line-height: 1.45;
+    color: var(--ink);
+    background: var(--bg);
+    font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
   }
-  header { max-width: 1240px; margin: 0 auto; padding: 22px 20px 8px; }
-  h1 { font-size: 1.45rem; margin: 0 0 6px; letter-spacing: -.02em; }
-  .sub { color: var(--muted); max-width: 900px; font-size: .95rem; }
-  .wrap { max-width: 1240px; margin: 0 auto; padding: 8px 20px 48px; }
-  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+  header { border-bottom: 1px solid var(--line); background: var(--paper); }
+  .inner { max-width: 1120px; margin: 0 auto; padding: 28px 24px 22px; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin: 0 0 8px;
+  }
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: clamp(1.6rem, 3vw, 2.15rem);
+    font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin: 0 0 10px;
+  }
+  .sub { margin: 0; max-width: 46rem; color: var(--muted); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 24px 64px; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
   .card {
-    background: var(--card);
+    background: var(--paper);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 14px 14px 12px;
+    border-radius: 12px;
+    padding: 18px 18px 16px;
   }
-  .s3 { grid-column: span 3; } .s4 { grid-column: span 4; }
-  .s5 { grid-column: span 5; } .s6 { grid-column: span 6; }
-  .s8 { grid-column: span 8; } .s12 { grid-column: span 12; }
-  @media (max-width: 980px) {
-    .s3,.s4,.s5,.s6,.s8,.s12 { grid-column: span 12; }
-  }
-  .k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .v { font-size: 1.55rem; font-weight: 750; margin-top: 2px; }
-  .bar { display: flex; height: 16px; border-radius: 99px; overflow: hidden; background: #0b1016; margin-top: 8px; }
+  .s4 { grid-column: span 4; } .s5 { grid-column: span 5; }
+  .s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s12 { grid-column: span 12; }
+  @media (max-width: 900px) { .s4,.s5,.s6,.s7,.s12 { grid-column: span 12; } }
+  .k { font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
+  .v { font-size: 1.55rem; font-weight: 700; margin-top: 6px; letter-spacing: -.02em; }
+  .bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: #efe8dc; margin-top: 12px; }
   .bar i { display: block; height: 100%; }
-  label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
-  input[type=number], input[type=text], select {
-    width: 100%; background: #0e141c; color: var(--text); border: 1px solid var(--line);
-    border-radius: 8px; padding: 8px 10px; font-size: 1rem;
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  input[type=number], input[type=text] {
+    width: 100%; background: #fff; color: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 10px; font-size: 1rem; font-family: inherit;
   }
-  input[type=range] { width: 100%; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-  th, td { padding: 6px 5px; border-bottom: 1px solid var(--line); text-align: right; }
-  th { color: var(--muted); font-weight: 600; font-size: .72rem; text-align: right; }
+  input:focus { outline: 2px solid #c7d7f5; border-color: #93b4ea; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .row3 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
   th:first-child, td:first-child, td.lft, th.lft { text-align: left; }
-  .l { color: #fda4af; } .f { color: #93c5fd; }
-  .chip { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .72rem; font-weight: 700; }
-  .ok { background: #064e3b; color: #a7f3d0; }
-  .warn { background: #78350f; color: #fde68a; }
-  .bad { background: #4c0519; color: #fecdd3; }
-  .muted { color: var(--muted); }
-  .tiny { font-size: .8rem; color: var(--muted); }
+  tr:hover td { background: #faf6ef; }
+  .l { color: var(--lula); font-weight: 600; }
+  .f { color: var(--flavio); font-weight: 600; }
+  .chip { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; margin-right: 6px; }
+  .ok { background: #e4f6ec; color: var(--ok); }
+  .warn { background: #f8edd9; color: var(--warn); }
+  .bad { background: #f8e4e4; color: var(--bad); }
+  .muted { color: var(--muted); font-weight: 500; }
+  .tiny { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; }
   button {
-    background: #1e3a5f; color: #dbeafe; border: 1px solid #2b4c75;
-    border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: .82rem;
+    background: #fff; color: var(--ink); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 12px; cursor: pointer; font-size: 13px; font-family: inherit;
   }
-  button.ghost { background: transparent; }
-  button:hover { filter: brightness(1.12); }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-  .tabs button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
-  td input { width: 72px; padding: 4px 6px; font-size: .8rem; text-align: right; }
-  .call { font-size: 1.02rem; margin: 8px 0 0; }
+  button:hover { background: #f4efe6; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; }
+  .tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  td input { width: 72px; padding: 5px 6px; font-size: 13px; text-align: right; }
+  .call { font-size: 1.12rem; margin: 10px 0 0; line-height: 1.4; }
+  .num { font-family: "Source Serif 4", Georgia, serif; color: var(--muted); font-size: 13px; margin-right: 6px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 8px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Nowcast 2026 — o que a tela mostra × o que deveria mostrar × o final</h1>
-  <p class="sub">No domingo: digite o % já apurado e o placar da TV. O esperado usa a pesquisa mais recente de cada UF no acervo do <b>PollingData</b>. Referência do agregador nacional em 24/09: Lula 40,1% × Flávio 37,5%. A “virada” da noite quase sempre é composição, não mudança de voto.</p>
+  <div class="inner">
+    <p class="eyebrow">Eleição presidencial · 1º turno · 2026</p>
+    <h1>Tela, esperado e projeção final</h1>
+    <p class="sub">Digite o % já apurado e o placar da TV. O esperado usa a última pesquisa de cada estado no PollingData, só no pedaço que já deveria ter chegado. A virada da noite quase sempre é composição, não mudança de voto.</p>
+  </div>
 </header>
 <div class="wrap">
   <div class="grid">
     <div class="card s5">
-      <div class="k">O que a tela mostra agora (TSE / TV)</div>
-      <div class="row3" style="margin-top:8px">
+      <div class="k">Placar da tela agora</div>
+      <div class="row3" style="margin-top:12px">
         <div><label>% do Brasil apurado</label><input id="pctBR" type="number" min="0" max="100" step="0.1" value="15" /></div>
         <div><label>Lula na tela (%)</label><input id="telaL" type="number" min="0" max="100" step="0.1" value="28" /></div>
         <div><label>Flávio na tela (%)</label><input id="telaF" type="number" min="0" max="100" step="0.1" value="46" /></div>
       </div>
-      <label style="margin-top:10px">Como estimar quais estados já chegaram</label>
+      <label style="margin-top:14px">Quais estados já chegaram</label>
       <div class="tabs" id="modeTabs">
-        <button class="active" data-mode="ordem">Ordem típica (Sul→SE→CO→N→NE)</button>
-        <button data-mode="manual">Eu informo o % por estado</button>
+        <button class="active" data-mode="ordem">Ordem típica Sul → NE</button>
+        <button data-mode="manual">Informar % por estado</button>
       </div>
       <p class="tiny" id="modeHint">O % nacional preenche os estados na ordem histórica de transmissão.</p>
     </div>
     <div class="card s7">
-      <div class="k">Leitura automática</div>
+      <div class="k">Leitura</div>
       <p class="call" id="veredito">—</p>
       <p class="tiny" id="veredito2"></p>
     </div>
-    <div class="card s4"><div class="k">1. Tela agora</div><div class="v" id="vTela">—</div><div class="bar" id="barTela"></div><p class="tiny" id="tTela"></p></div>
-    <div class="card s4"><div class="k">2. Esperado neste %</div><div class="v" id="vEsp">—</div><div class="bar" id="barEsp"></div><p class="tiny" id="tEsp"></p></div>
-    <div class="card s4"><div class="k">3. Projeção final</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
+    <div class="card s4"><div class="k"><span class="num">01</span> Tela agora</div><div class="v" id="vTela">—</div><div class="bar" id="barTela"></div><p class="tiny" id="tTela"></p></div>
+    <div class="card s4"><div class="k"><span class="num">02</span> Esperado neste %</div><div class="v" id="vEsp">—</div><div class="bar" id="barEsp"></div><p class="tiny" id="tEsp"></p></div>
+    <div class="card s4"><div class="k"><span class="num">03</span> Projeção final</div><div class="v" id="vFin">—</div><div class="bar" id="barFin"></div><p class="tiny" id="tFin"></p></div>
     <div class="card s12">
-      <div class="k">Desvio da tela em relação ao esperado neste momento</div>
-      <div class="row3" style="margin-top:8px">
-        <div><div class="k">Lula: tela − esperado</div><div class="v" id="devL">—</div></div>
-        <div><div class="k">Flávio: tela − esperado</div><div class="v" id="devF">—</div></div>
-        <div><div class="k">O final ainda está longe da tela?</div><div class="v" id="devFinal" style="font-size:1.15rem">—</div></div>
+      <div class="k">Desvio da tela em relação ao esperado</div>
+      <div class="row3" style="margin-top:12px">
+        <div><div class="k">Lula · tela − esperado</div><div class="v" id="devL">—</div></div>
+        <div><div class="k">Flávio · tela − esperado</div><div class="v" id="devF">—</div></div>
+        <div><div class="k">A tela ainda é o recorte?</div><div class="v" id="devFinal" style="font-size:1.15rem">—</div></div>
       </div>
-      <p class="tiny">Até ±2 pp: compatível. 2–4 pp: atenção. Acima de 4 pp: ordem diferente ou UF fora da pesquisa.</p>
+      <p class="tiny">Até ±2 pp: compatível. 2–4 pp: atenção. Acima de 4 pp: ordem diferente ou estado fora da pesquisa.</p>
     </div>
     <div class="card s12">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <div class="k">Estados</div>
         <div>
-          <button class="ghost" id="btnReset">Resetar ordem típica</button>
-          <button class="ghost" id="btnZero">Zerar</button>
-          <button class="ghost" id="btnFull">100% todos</button>
+          <button id="btnReset">Ordem típica</button>
+          <button id="btnZero">Zerar</button>
+          <button id="btnFull">100% todos</button>
         </div>
       </div>
-      <p class="tiny">No modo manual, edite % apurado. Lula real / Flávio real substituem a pesquisa da UF.</p>
+      <p class="tiny">No modo por estado, edite o % apurado. Lula real / Flávio real substituem a pesquisa da UF.</p>
       <div style="overflow:auto;max-height:560px;margin-top:8px"><table id="tab"></table></div>
     </div>
-    <div class="card s6"><div class="k">Como ler com 15% apurado</div><p class="tiny">15% do Brasil na ordem típica é quase só o Sul. Flávio à frente nesse pedaço não é surpresa. Surpresa seria o sinal contrário — ou Flávio liderando com 85%, quando o Nordeste já deveria ter entrado.</p></div>
-    <div class="card s6"><div class="k">Fontes</div><p class="tiny">Eleitorado TSE jul/2026. Pesquisas: última linha Lula×Flávio por UF no PollingData. Agregado estadual do PD costuma estar locked. IVR é mais ruidoso que presencial. Não é resultado oficial.</p></div>
+    <div class="card s6"><div class="k">Como ler com 15% apurado</div><p class="tiny">Na ordem típica, 15% do Brasil é quase só o Sul. Flávio à frente nesse pedaço não é surpresa. Surpresa seria o sinal contrário — ou Flávio liderando com 85%, quando o Nordeste já deveria ter entrado.</p></div>
+    <div class="card s6"><div class="k">Fontes</div><p class="tiny">Eleitorado TSE, jul/2026. Pesquisas: última linha Lula × Flávio por UF no PollingData. Agregador nacional PD em 24/09: Lula 40,1% × Flávio 37,5%. IVR é mais ruidoso que presencial. Não é resultado oficial.</p></div>
   </div>
+  <footer>Nowcast de composição · rconterb/nowcast-eleicoes-2026</footer>
 </div>
 <script>
 const PD_NACIONAL = {l:40.1, f:37.5, data:'24/09/26'};
@@ -223,7 +239,7 @@ function onCell(ev){
 function setModeButtons(){
   document.querySelectorAll('#modeTabs button').forEach(b=> b.classList.toggle('active', b.dataset.mode===mode));
   document.getElementById('modeHint').textContent = mode==='ordem'
-    ? 'O % do Brasil preenche os estados na ordem histórica (SC→PR→RS→SP…).'
+    ? 'O % do Brasil preenche os estados na ordem histórica (SC → PR → RS → SP…).'
     : 'Você controla o % apurado de cada UF.';
 }
 function paint(rebuildTable){
