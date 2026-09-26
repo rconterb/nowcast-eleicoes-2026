@@ -9,6 +9,12 @@ function mixState(uf,s){
   const t=(s+1)/2;
   return {l:lerp(a[0],b[0],t), f:lerp(a[1],b[1],t)};
 }
+function normCdf(z){
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const s=z<0?-1:1,x=Math.abs(z)/Math.SQRT2,t=1/(1+p*x);
+  const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return 0.5*(1+s*y);
+}
 function expectedAt(pct,s){
   const snap=DATA.map(d=>({l:d.l,f:d.f,pct:d.pct}));
   DATA.forEach(d=>{const m=mixState(d.uf,s); if(m){d.l=m.l;d.f=m.f;}});
@@ -16,6 +22,18 @@ function expectedAt(pct,s){
   const e=expectedNow();
   DATA.forEach((d,i)=>{d.l=snap[i].l;d.f=snap[i].f;d.pct=snap[i].pct;});
   return e;
+}
+function remainSigma(){
+  let rest=0,num=0;
+  DATA.forEach(d=>{
+    const r=typeof remainShare==='function'?remainShare(d):d.e*(1-clamp(d.pct||0,0,100)/100);
+    const a=Y18[d.uf],b=Y22[d.uf];
+    if(!a||!b||r<=0) return;
+    const dlt=b[0]-a[0];
+    num+=r*dlt*dlt; rest+=r;
+  });
+  const struct=rest?Math.sqrt(num/rest)/2:3;
+  return struct;
 }
 function setPctApurado(pct, fromSlider){
   pct=clamp(pct,0,100);
@@ -67,10 +85,15 @@ function trendLine(){
   const w=clamp(exp.pct/100,0,1);
   const k=w/(w+0.28);
   const m=mosaic();
-  const finL=w*telaL+(1-w)*(m.l+k*(telaL-exp.l));
-  const finF=w*telaF+(1-w)*(m.f+k*(telaF-exp.f));
-  const sig=SIG_POLL*Math.sqrt(Math.max(0.04,1-w))+Math.abs(Y22.SP[0]-Y18.SP[0])*0.15*Math.sqrt(1-w);
-  return {exp,w,k,dL:telaL-exp.l,dF:telaF-exp.f,finL,finF,m,sig,telaL,telaF};
+  const rest=typeof pollsRemaining==='function'?pollsRemaining():m;
+  const finL=w*telaL+(1-w)*(rest.l+k*(telaL-exp.l));
+  const finF=w*telaF+(1-w)*(rest.f+k*(telaF-exp.f));
+  const sigMap=remainSigma();
+  const sigUrna=SIG_POLL*Math.sqrt(Math.max(0.04,1-w));
+  const sigNow=sigUrna+sigMap*0.35;
+  const sigFin=Math.max(0.35,(1-w)*Math.sqrt(sigMap*sigMap+SIG_POLL*SIG_POLL));
+  const pL=normCdf((finL-50)/Math.max(sigFin,0.2));
+  return {exp,w,k,dL:telaL-exp.l,dF:telaF-exp.f,finL,finF,m,rest,sigNow,sigFin,sigMap,telaL,telaF,pL};
 }
 function pathSeries(){
   const s=window.SWING||0;
@@ -82,6 +105,7 @@ function pathSeries(){
     pts.push({p,mL:mid.l,mF:mid.f,aL:a.l,aF:a.f,bL:b.l,bF:b.f,sig});
   }
   restorePcts(saved);
+  window._bbPts=pts;
   return pts;
 }
 function drawBands(){
@@ -90,6 +114,7 @@ function drawBands(){
   const t=trendLine();
   const pts=pathSeries();
   const W=720,H=300,L=40,R=16,T=22,B=32,iw=W-L-R,ih=H-T-B;
+  window._bbGeom={W,H,L,R,T,B,iw,ih};
   const x=p=>L+iw*p/100;
   const y=v=>T+ih*(1-(clamp(v,20,80)-20)/60);
   const poly=(arr,up)=>arr.map((pt,i)=>(i?'L':'M')+x(pt.p).toFixed(1)+','+y(up(pt)).toFixed(1)).join(' ');
@@ -108,28 +133,65 @@ function drawBands(){
     band(pt=>pt.mL-2*pt.sig, pt=>pt.mL+2*pt.sig, 'var(--lula)')+
     band(pt=>pt.mF-2*pt.sig, pt=>pt.mF+2*pt.sig, 'var(--flavio)')+
     line(pt=>pt.mL,'var(--lula)')+line(pt=>pt.mF,'var(--flavio)')+
-    line(pt=>pt.aL,'var(--lula)',true)+line(pt=>pt.bL,'var(--lula)',true)+
+    line(pt=>pt.aL,'#b91c1c',true)+line(pt=>pt.bL,'#b91c1c',true)+
     '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(50)+'" y2="'+y(50)+'" stroke="#1c1917" opacity=".25"/>'+
-    '<line x1="'+now+'" x2="'+now+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#c4bbb0" stroke-dasharray="2 3"/>'+
+    '<line id="bbNow" x1="'+now+'" x2="'+now+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#c4bbb0" stroke-dasharray="2 3"/>'+
+    '<line id="bbHover" x1="'+now+'" x2="'+now+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#1c1917" opacity="0"/>'+
     '<circle cx="'+now+'" cy="'+y(t.telaL)+'" r="5" fill="var(--lula)"/>'+
     '<circle cx="'+now+'" cy="'+y(t.telaF)+'" r="5" fill="var(--flavio)"/>'+
     '<text x="'+L+'" y="14">Lula</text><text x="'+(L+40)+'" y="14" fill="var(--flavio)">Flávio</text>'+
-    '<text x="'+(W-R)+'" y="14" text-anchor="end">faixa = 2018–2022 + 2σ da urna</text>';
+    '<text x="'+(W-R)+'" y="14" text-anchor="end">passe o mouse — faixa 2018–2022 + 2σ</text>';
+  bindChartHover();
+}
+function bindChartHover(){
+  const svg=document.getElementById('bbChart');
+  const tip=document.getElementById('bbTip');
+  if(!svg||!tip||svg._hoverBound) return;
+  svg._hoverBound=true;
+  function atEvent(ev){
+    const pts=window._bbPts||[];
+    const g=window._bbGeom; if(!g||!pts.length) return;
+    const r=svg.getBoundingClientRect();
+    const px=(ev.clientX-r.left)*(g.W/r.width);
+    const p=clamp((px-g.L)/g.iw*100,2,100);
+    let best=pts[0],bd=99;
+    pts.forEach(pt=>{const d=Math.abs(pt.p-p); if(d<bd){bd=d;best=pt;}});
+    return best;
+  }
+  svg.addEventListener('mousemove',ev=>{
+    const pt=atEvent(ev); if(!pt) return;
+    const hover=document.getElementById('bbHover');
+    const g=window._bbGeom;
+    const x=g.L+g.iw*pt.p/100;
+    if(hover){ hover.setAttribute('x1',x); hover.setAttribute('x2',x); hover.setAttribute('opacity','0.55'); }
+    const loL=Math.min(pt.aL,pt.bL)-pt.sig, hiL=Math.max(pt.aL,pt.bL)+pt.sig;
+    const loF=Math.min(pt.aF,pt.bF)-pt.sig, hiF=Math.max(pt.aF,pt.bF)+pt.sig;
+    tip.style.display='block';
+    tip.innerHTML='<b>'+pt.p+'% apurado</b><br>'+
+      '<span class="l">Lula '+fmt(pt.mL)+'%</span> · faixa '+fmt(loL)+'–'+fmt(hiL)+'%<br>'+
+      '<span class="f">Flávio '+fmt(pt.mF)+'%</span> · faixa '+fmt(loF)+'–'+fmt(hiF)+'%<br>'+
+      '<span class="tiny">2018: Lula '+fmt(pt.aL)+'% × Flávio '+fmt(pt.aF)+'%<br>2022: Lula '+fmt(pt.bL)+'% × Flávio '+fmt(pt.bF)+'%</span>';
+  });
+  svg.addEventListener('mouseleave',()=>{
+    tip.style.display='none';
+    const hover=document.getElementById('bbHover');
+    if(hover) hover.setAttribute('opacity','0');
+  });
 }
 function paintTrend(){
   const box=document.getElementById('swingTrend');
   if(!box) return;
   const t=trendLine();
-  const lado=t.dF>1.2?'A TV está melhor para o Flávio do que o mapa neste pedaço ('+fmtPP(t.dF)+').':
-             t.dL>1.2?'A TV está melhor para o Lula do que o mapa neste pedaço ('+fmtPP(t.dL)+').':
+  const lado=t.dF>1.2?'A TV está +'+fmt(t.dF)+' pp no Flávio vs o mapa. O residual entra no resto com κ='+fmt(t.k)+'.':
+             t.dL>1.2?'A TV está +'+fmt(t.dL)+' pp no Lula vs o mapa. O residual entra no resto com κ='+fmt(t.k)+'.':
              'A TV está alinhada com o mapa neste pedaço.';
-  const quem=t.finL>=t.finF?'Lula':'Flávio';
-  const marg=Math.abs(t.finL-t.finF);
-  box.innerHTML='<div class="k">O que a TV deveria mostrar agora</div>'+
-    '<div class="v"><span class="l">Lula '+fmt(t.exp.l)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(t.exp.f)+'%</span></div>'+
-    '<p class="help">'+fmt(t.w*100)+'% apurado. '+lado+' Banda de 2σ neste ponto: ±'+fmt(2*t.sig)+' pp.</p>'+
-    '<p class="help">Tendência para o final: <b class="l">Lula '+fmt(t.finL)+'%</b> × <b class="f">Flávio '+fmt(t.finF)+'%</b> — '+
-    (marg<0.4?'empate':quem+' por '+fmt(marg)+' pp')+'. Intervalo 2σ do final: Lula '+fmt(t.finL-2*t.sig)+'–'+fmt(t.finL+2*t.sig)+'%.</p>';
+  const pL=Math.round(t.pL*100), pF=100-pL;
+  box.innerHTML='<div class="k">Projeção estatística do 2º turno</div>'+
+    '<div class="v"><span class="l">Lula '+fmt(t.finL)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(t.finF)+'%</span></div>'+
+    '<p class="help">Média = urna já saída + mapa do que falta + residual da TV encolhido. σ do final = (1−w)√(σ²mapa+σ²urna), σ mapa nos estados que faltam = '+fmt(t.sigMap)+' pp.</p>'+
+    '<p class="help">Intervalo 68%: Lula '+fmt(t.finL-t.sigFin)+'–'+fmt(t.finL+t.sigFin)+'%. Intervalo 95%: '+fmt(t.finL-2*t.sigFin)+'–'+fmt(t.finL+2*t.sigFin)+'%.</p>'+
+    '<p class="help"><b>P(Lula vence)</b> = '+pL+'% · <b>P(Flávio vence)</b> = '+pF+'% <span class="tiny">(normal, P(L>50) = Φ((μ−50)/σ))</span></p>'+
+    '<p class="help">Neste pedaço o mapa manda <span class="l">Lula '+fmt(t.exp.l)+'%</span> × <span class="f">Flávio '+fmt(t.exp.f)+'%</span>. '+lado+'</p>';
   drawBands();
 }
 function ensureSwing(){
@@ -140,7 +202,7 @@ function ensureSwing(){
   card.className='card s12';
   card.id='swingCard';
   card.innerHTML='<div class="k">Dois controles para acompanhar a noite</div>'+
-    '<p class="help">Primeiro o mapa (2018 puxa Flávio, 2022 puxa Lula). Depois o % já apurado. A faixa do gráfico é o envelope 2018–2022 mais 2 desvios da urna — como banda de Bollinger: o meio é o mapa escolhido, as bordas são até onde o ponto ainda pode ir.</p>'+
+    '<p class="help">Mapa 2018–2022 + % apurado. A projeção do 2º turno junta a urna, o mapa do resto e um intervalo. Passe o mouse no gráfico para ver o % de cada etapa.</p>'+
     '<div class="k" style="margin-top:14px">1. Que eleição 2026 parece?</div>'+
     '<div id="swingEra" class="pick" style="margin:10px 0"><button type="button" data-era="18">2018 · Flávio</button><button type="button" data-era="mid">meio</button><button type="button" data-era="22">2022 · Lula</button></div>'+
     '<input id="swing" type="range" min="-1" max="1" step="0.01" value="0" />'+
@@ -155,8 +217,11 @@ function ensureSwing(){
     '<input id="night" type="range" min="1" max="100" step="1" value="15" />'+
     '<div class="v" id="nightVal" style="font-size:1.15rem">15% do Brasil apurado</div>'+
     '<div id="swingTrend" style="margin-top:12px"></div>'+
-    '<svg id="bbChart" viewBox="0 0 720 300" width="100%" height="300" role="img" aria-label="Placar com bandas de volatilidade"></svg>'+
-    '<p class="tiny">Linha cheia = mapa escolhido. Faixa clara = 2018 até 2022. Faixa mais forte = ±2σ da urna (encolhe quando sobra menos voto). Bolinha = número da TV agora.</p>';
+    '<div style="position:relative">'+
+      '<svg id="bbChart" viewBox="0 0 720 300" width="100%" height="300" role="img"></svg>'+
+      '<div id="bbTip" style="display:none;position:absolute;left:12px;top:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.08);pointer-events:none;max-width:260px"></div>'+
+    '</div>'+
+    '<p class="tiny">Passe o mouse: aparece o % daquele ponto, o mapa, o envelope 2018/2022 e a banda ±2σ. Bolinha = TV agora.</p>';
   const mos=document.getElementById('mosaicoBR');
   if(mos&&mos.nextSibling) host.insertBefore(card, mos.nextSibling);
   else {
