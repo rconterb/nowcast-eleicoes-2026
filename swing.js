@@ -2,109 +2,134 @@ const Y18={AC:[22.78,77.22],AL:[59.92,40.08],AP:[49.80,50.20],AM:[49.73,50.27],B
 const Y22={AC:[29.70,70.30],AL:[58.68,41.32],AP:[48.64,51.36],AM:[51.10,48.90],BA:[72.12,27.88],CE:[69.97,30.03],DF:[41.19,58.81],ES:[41.96,58.04],GO:[41.29,58.71],MA:[71.14,28.86],MT:[34.92,65.08],MS:[40.51,59.49],MG:[50.20,49.80],PA:[54.75,45.25],PB:[66.62,33.38],PR:[37.60,62.40],PE:[66.93,33.07],PI:[76.86,23.14],RJ:[43.47,56.53],RN:[65.10,34.90],RS:[43.65,56.35],RO:[29.34,70.66],RR:[23.92,76.08],SC:[30.73,69.27],SP:[44.76,55.24],SE:[67.21,32.79],TO:[51.36,48.64]};
 const SIG_POLL=1.6;
 window.SWING=0;
+window.PCT=15;
+let _lock=false;
 function lerp(a,b,t){return a+(b-a)*t;}
 function mixState(uf,s){
   const a=Y18[uf],b=Y22[uf];
-  if(!a||!b) return null;
+  if(!a||!b) return {l:0,f:0};
   const t=(s+1)/2;
   return {l:lerp(a[0],b[0],t), f:lerp(a[1],b[1],t)};
 }
 function normCdf(z){
   const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
-  const s=z<0?-1:1,x=Math.abs(z)/Math.SQRT2,t=1/(1+p*x);
+  const sign=z<0?-1:1,x=Math.abs(z)/Math.SQRT2,t=1/(1+p*x);
   const y=1-((((a5*t+a4)*t+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
-  return 0.5*(1+s*y);
+  return 0.5*(1+sign*y);
 }
-function expectedAt(pct,s){
-  const snap=DATA.map(d=>({l:d.l,f:d.f,pct:d.pct}));
-  DATA.forEach(d=>{const m=mixState(d.uf,s); if(m){d.l=m.l;d.f=m.f;}});
-  applyTypicalOrder(pct);
-  const e=expectedNow();
-  DATA.forEach((d,i)=>{d.l=snap[i].l;d.f=snap[i].f;d.pct=snap[i].pct;});
-  return e;
+function fillOrder(pctBR){
+  let remain=TOTAL*clamp(pctBR,0,100)/100;
+  const out={};
+  [...DATA].sort((a,b)=>a.ordem-b.ordem).forEach(d=>out[d.uf]=0);
+  for(const d of [...DATA].sort((a,b)=>a.ordem-b.ordem)){
+    if(remain<=0) break;
+    const take=Math.min(d.e,remain);
+    out[d.uf]=100*take/d.e;
+    remain-=take;
+  }
+  return out;
 }
-function remainSigma(){
+function expectedFrom(pctMap,s){
+  let e=0,l=0,f=0;
+  DATA.forEach(d=>{
+    const w=d.e*(pctMap[d.uf]||0)/100;
+    if(w<=0) return;
+    const m=mixState(d.uf,s);
+    e+=w; l+=w*m.l/100; f+=w*m.f/100;
+  });
+  if(e<=0) return {e:0,pct:0,l:0,f:0};
+  return {e,pct:100*e/TOTAL,l:100*l/e,f:100*f/e};
+}
+function mosaicFrom(s){
+  let l=0,f=0;
+  DATA.forEach(d=>{ const m=mixState(d.uf,s); l+=d.e*m.l; f+=d.e*m.f; });
+  return {l:l/TOTAL,f:f/TOTAL};
+}
+function remainSigma(pctMap){
   let rest=0,num=0;
   DATA.forEach(d=>{
-    const r=typeof remainShare==='function'?remainShare(d):d.e*(1-clamp(d.pct||0,0,100)/100);
-    const a=Y18[d.uf],b=Y22[d.uf];
-    if(!a||!b||r<=0) return;
-    const dlt=b[0]-a[0];
+    const r=d.e*(1-(pctMap[d.uf]||0)/100);
+    if(r<=0||!Y18[d.uf]) return;
+    const dlt=Y22[d.uf][0]-Y18[d.uf][0];
     num+=r*dlt*dlt; rest+=r;
   });
-  const struct=rest?Math.sqrt(num/rest)/2:3;
-  return struct;
+  return rest?Math.sqrt(num/rest)/2:3;
 }
-function setPctApurado(pct, fromSlider){
-  pct=clamp(pct,0,100);
-  const box=document.getElementById('pctBR');
-  const night=document.getElementById('night');
-  const nightVal=document.getElementById('nightVal');
-  const s1=document.getElementById('slider1t');
-  if(box && (!fromSlider || Math.abs((parseFloat(box.value)||0)-pct)>0.05)) box.value=fmt(pct);
-  if(night && Math.abs((parseFloat(night.value)||0)-pct)>0.05) night.value=pct;
-  if(nightVal) nightVal.textContent=fmt(pct)+'% do Brasil apurado';
-  if(s1 && Math.abs((parseFloat(s1.value)||0)-pct)>0.05) s1.value=pct;
-  if(typeof mode==='undefined' || mode==='ordem'){
-    if(typeof applyTypicalOrder==='function') applyTypicalOrder(pct);
-  }
-  if(typeof syncTelaFromPolls==='function' && !window._telaTouched) syncTelaFromPolls();
-  if(typeof paint==='function') paint(true);
-  if(typeof updateFirstRound==='function') updateFirstRound();
-  paintTrend();
-}
-function applySwing(s){
-  window.SWING=s;
+function applyMapToData(s){
   DATA.forEach(d=>{
     const m=mixState(d.uf,s);
-    if(!m) return;
     d.l=Math.round(m.l*10)/10;
     d.f=Math.round(m.f*10)/10;
     d.src='mapa '+(s<-0.33?'2018':s>0.33?'2022':'mistura 18/22')+' · 2º turno TSE';
   });
+}
+function setPctApurado(pct){
+  if(_lock) return;
+  _lock=true;
+  try{
+    pct=clamp(pct,1,100);
+    window.PCT=pct;
+    const night=document.getElementById('night');
+    const nightVal=document.getElementById('nightVal');
+    const box=document.getElementById('pctBR');
+    const s1=document.getElementById('slider1t');
+    if(night) night.value=pct;
+    if(nightVal) nightVal.textContent=fmt(pct)+'% do Brasil apurado';
+    if(box) box.value=String(Math.round(pct*10)/10);
+    if(s1) s1.value=pct;
+    if(typeof mode==='undefined' || mode==='ordem') applyTypicalOrder(pct);
+    if(typeof syncTelaFromPolls==='function' && !window._telaTouched) syncTelaFromPolls();
+    if(typeof paint==='function') paint(false);
+    if(typeof updateFirstRound==='function') updateFirstRound();
+    paintTrend();
+  } finally { _lock=false; }
+}
+function applySwing(s){
+  if(_lock) return;
+  window.SWING=s;
+  applyMapToData(s);
   const sl=document.getElementById('swingVal');
   const lab=document.getElementById('swingLab');
   if(sl) sl.textContent=(s<0?Math.round(-s*100)+'% 2018':s>0?Math.round(s*100)+'% 2022':'meio-termo');
   if(lab){
-    if(s<=-0.7) lab.textContent='Mapa 2018 — Bolsonaro 55% × Haddad 45%. Flávio herda esse país.';
-    else if(s>=0.7) lab.textContent='Mapa 2022 — Lula 51% × Bolsonaro 49%. Lula herda esse país.';
-    else lab.textContent='Cada estado é a média ponderada dos 2º turnos de 2018 e 2022.';
+    if(s<=-0.7) lab.textContent='Mapa 2018 — mosaico auditado Lula 44,9% × Flávio 55,1%.';
+    else if(s>=0.7) lab.textContent='Mapa 2022 — mosaico auditado Lula 50,9% × Flávio 49,1%.';
+    else lab.textContent='Mosaico do meio: Lula 47,9% × Flávio 52,1% (média 2018/2022).';
   }
   document.querySelectorAll('#swingEra button').forEach(b=>b.classList.toggle('on', b.dataset.era===(s<=-0.5?'18':s>=0.5?'22':'mid')));
   if(typeof syncTelaFromPolls==='function' && !window._telaTouched) syncTelaFromPolls();
   if(typeof paintMosaic==='function') paintMosaic();
-  if(typeof paint==='function') paint(true);
+  if(typeof paint==='function') paint(false);
   if(typeof updateFirstRound==='function') updateFirstRound();
   if(typeof renderTargets==='function') renderTargets();
   paintTrend();
 }
 function trendLine(){
+  const pct=window.PCT||15, s=window.SWING||0;
+  const pctMap=fillOrder(pct);
+  const exp=expectedFrom(pctMap,s);
+  const restMap={}; DATA.forEach(d=>restMap[d.uf]=100-(pctMap[d.uf]||0));
+  const rest=expectedFrom(restMap,s);
+  const mosa=mosaicFrom(s);
   const telaL=clamp(parseFloat(document.getElementById('telaL').value)||0,0,100);
   const telaF=clamp(parseFloat(document.getElementById('telaF').value)||0,0,100);
-  const exp=expectedNow();
-  const w=clamp(exp.pct/100,0,1);
+  const w=clamp(pct/100,0,1);
   const k=w/(w+0.28);
-  const m=mosaic();
-  const rest=typeof pollsRemaining==='function'?pollsRemaining():m;
   const finL=w*telaL+(1-w)*(rest.l+k*(telaL-exp.l));
   const finF=w*telaF+(1-w)*(rest.f+k*(telaF-exp.f));
-  const sigMap=remainSigma();
-  const sigUrna=SIG_POLL*Math.sqrt(Math.max(0.04,1-w));
-  const sigNow=sigUrna+sigMap*0.35;
+  const sigMap=remainSigma(pctMap);
   const sigFin=Math.max(0.35,(1-w)*Math.sqrt(sigMap*sigMap+SIG_POLL*SIG_POLL));
   const pL=normCdf((finL-50)/Math.max(sigFin,0.2));
-  return {exp,w,k,dL:telaL-exp.l,dF:telaF-exp.f,finL,finF,m,rest,sigNow,sigFin,sigMap,telaL,telaF,pL};
+  return {pct,exp,rest,mosa,w,k,dL:telaL-exp.l,dF:telaF-exp.f,finL,finF,sigMap,sigFin,telaL,telaF,pL};
 }
 function pathSeries(){
-  const s=window.SWING||0;
-  const pts=[];
-  const saved=snapshotPcts();
+  const s=window.SWING||0, pts=[];
   for(let p=2;p<=100;p+=2){
-    const mid=expectedAt(p,s), a=expectedAt(p,-1), b=expectedAt(p,1);
-    const w=p/100, sig=SIG_POLL*Math.sqrt(Math.max(0.04,1-w))+1.1;
+    const map=fillOrder(p);
+    const mid=expectedFrom(map,s), a=expectedFrom(map,-1), b=expectedFrom(map,1);
+    const sig=SIG_POLL*Math.sqrt(Math.max(0.04,1-p/100))+1.1;
     pts.push({p,mL:mid.l,mF:mid.f,aL:a.l,aF:a.f,bL:b.l,bF:b.f,sig});
   }
-  restorePcts(saved);
   window._bbPts=pts;
   return pts;
 }
@@ -117,30 +142,29 @@ function drawBands(){
   window._bbGeom={W,H,L,R,T,B,iw,ih};
   const x=p=>L+iw*p/100;
   const y=v=>T+ih*(1-(clamp(v,20,80)-20)/60);
-  const poly=(arr,up)=>arr.map((pt,i)=>(i?'L':'M')+x(pt.p).toFixed(1)+','+y(up(pt)).toFixed(1)).join(' ');
+  const poly=(arr,fn)=>arr.map((pt,i)=>(i?'L':'M')+x(pt.p).toFixed(1)+','+y(fn(pt)).toFixed(1)).join(' ');
   const band=(lo,hi,color)=>{
     const top=pts.map((pt,i)=>(i?'L':'M')+x(pt.p).toFixed(1)+','+y(hi(pt)).toFixed(1)).join(' ');
     const bot=pts.slice().reverse().map(pt=>'L'+x(pt.p).toFixed(1)+','+y(lo(pt)).toFixed(1)).join(' ');
-    return '<path d="'+top+bot+' Z" fill="'+color+'" opacity=".18"/>';
+    return '<path d="'+top+' '+bot+' Z" fill="'+color+'" opacity=".18"/>';
   };
   const line=(fn,color,dash)=>'<path d="'+poly(pts,fn)+'" fill="none" stroke="'+color+'" stroke-width="2" '+(dash?'stroke-dasharray="5 4"':'')+'/>';
   const grid=[30,40,50,60,70].map(v=>'<line class="gridline" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'"/><text x="4" y="'+(y(v)+3)+'">'+v+'</text>').join('');
   const axis=[0,25,50,75,100].map(p=>'<text x="'+x(p)+'" y="'+(H-8)+'" text-anchor="middle">'+p+'%</text>').join('');
-  const now=x(t.w*100);
+  const now=x(t.pct);
   svg.innerHTML=grid+axis+
     band(pt=>Math.min(pt.aL,pt.bL)-pt.sig, pt=>Math.max(pt.aL,pt.bL)+pt.sig, 'var(--lula)')+
     band(pt=>Math.min(pt.aF,pt.bF)-pt.sig, pt=>Math.max(pt.aF,pt.bF)+pt.sig, 'var(--flavio)')+
     band(pt=>pt.mL-2*pt.sig, pt=>pt.mL+2*pt.sig, 'var(--lula)')+
     band(pt=>pt.mF-2*pt.sig, pt=>pt.mF+2*pt.sig, 'var(--flavio)')+
     line(pt=>pt.mL,'var(--lula)')+line(pt=>pt.mF,'var(--flavio)')+
-    line(pt=>pt.aL,'#b91c1c',true)+line(pt=>pt.bL,'#b91c1c',true)+
     '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(50)+'" y2="'+y(50)+'" stroke="#1c1917" opacity=".25"/>'+
     '<line id="bbNow" x1="'+now+'" x2="'+now+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#c4bbb0" stroke-dasharray="2 3"/>'+
     '<line id="bbHover" x1="'+now+'" x2="'+now+'" y1="'+T+'" y2="'+(H-B)+'" stroke="#1c1917" opacity="0"/>'+
     '<circle cx="'+now+'" cy="'+y(t.telaL)+'" r="5" fill="var(--lula)"/>'+
     '<circle cx="'+now+'" cy="'+y(t.telaF)+'" r="5" fill="var(--flavio)"/>'+
     '<text x="'+L+'" y="14">Lula</text><text x="'+(L+40)+'" y="14" fill="var(--flavio)">Flávio</text>'+
-    '<text x="'+(W-R)+'" y="14" text-anchor="end">passe o mouse — faixa 2018–2022 + 2σ</text>';
+    '<text x="'+(W-R)+'" y="14" text-anchor="end">mouse = % de cada etapa</text>';
   bindChartHover();
 }
 function bindChartHover(){
@@ -148,29 +172,21 @@ function bindChartHover(){
   const tip=document.getElementById('bbTip');
   if(!svg||!tip||svg._hoverBound) return;
   svg._hoverBound=true;
-  function atEvent(ev){
-    const pts=window._bbPts||[];
-    const g=window._bbGeom; if(!g||!pts.length) return;
+  svg.addEventListener('mousemove',ev=>{
+    const pts=window._bbPts||[], g=window._bbGeom;
+    if(!g||!pts.length) return;
     const r=svg.getBoundingClientRect();
     const px=(ev.clientX-r.left)*(g.W/r.width);
     const p=clamp((px-g.L)/g.iw*100,2,100);
     let best=pts[0],bd=99;
     pts.forEach(pt=>{const d=Math.abs(pt.p-p); if(d<bd){bd=d;best=pt;}});
-    return best;
-  }
-  svg.addEventListener('mousemove',ev=>{
-    const pt=atEvent(ev); if(!pt) return;
     const hover=document.getElementById('bbHover');
-    const g=window._bbGeom;
-    const x=g.L+g.iw*pt.p/100;
+    const x=g.L+g.iw*best.p/100;
     if(hover){ hover.setAttribute('x1',x); hover.setAttribute('x2',x); hover.setAttribute('opacity','0.55'); }
-    const loL=Math.min(pt.aL,pt.bL)-pt.sig, hiL=Math.max(pt.aL,pt.bL)+pt.sig;
-    const loF=Math.min(pt.aF,pt.bF)-pt.sig, hiF=Math.max(pt.aF,pt.bF)+pt.sig;
     tip.style.display='block';
-    tip.innerHTML='<b>'+pt.p+'% apurado</b><br>'+
-      '<span class="l">Lula '+fmt(pt.mL)+'%</span> · faixa '+fmt(loL)+'–'+fmt(hiL)+'%<br>'+
-      '<span class="f">Flávio '+fmt(pt.mF)+'%</span> · faixa '+fmt(loF)+'–'+fmt(hiF)+'%<br>'+
-      '<span class="tiny">2018: Lula '+fmt(pt.aL)+'% × Flávio '+fmt(pt.aF)+'%<br>2022: Lula '+fmt(pt.bL)+'% × Flávio '+fmt(pt.bF)+'%</span>';
+    tip.innerHTML='<b>'+best.p+'% apurado</b><br>'+
+      '<span class="l">Lula '+fmt(best.mL)+'%</span> × <span class="f">Flávio '+fmt(best.mF)+'%</span><br>'+
+      '<span class="tiny">2018: '+fmt(best.aL)+' × '+fmt(best.aF)+'<br>2022: '+fmt(best.bL)+' × '+fmt(best.bF)+'<br>±2σ Lula '+fmt(best.mL-2*best.sig)+'–'+fmt(best.mL+2*best.sig)+'</span>';
   });
   svg.addEventListener('mouseleave',()=>{
     tip.style.display='none';
@@ -182,16 +198,16 @@ function paintTrend(){
   const box=document.getElementById('swingTrend');
   if(!box) return;
   const t=trendLine();
-  const lado=t.dF>1.2?'A TV está +'+fmt(t.dF)+' pp no Flávio vs o mapa. O residual entra no resto com κ='+fmt(t.k)+'.':
-             t.dL>1.2?'A TV está +'+fmt(t.dL)+' pp no Lula vs o mapa. O residual entra no resto com κ='+fmt(t.k)+'.':
-             'A TV está alinhada com o mapa neste pedaço.';
-  const pL=Math.round(t.pL*100), pF=100-pL;
-  box.innerHTML='<div class="k">Projeção estatística do 2º turno</div>'+
+  const lado=t.dF>1.2?'TV +'+fmt(t.dF)+' pp no Flávio vs o mapa. κ='+fmt(t.k)+'.':
+             t.dL>1.2?'TV +'+fmt(t.dL)+' pp no Lula vs o mapa. κ='+fmt(t.k)+'.':
+             'TV alinhada ao mapa neste pedaço.';
+  const pL=Math.round(t.pL*100);
+  box.innerHTML='<div class="k">Projeção estatística · '+fmt(t.pct)+'% apurado</div>'+
     '<div class="v"><span class="l">Lula '+fmt(t.finL)+'%</span> <span class="muted">×</span> <span class="f">Flávio '+fmt(t.finF)+'%</span></div>'+
-    '<p class="help">Média = urna já saída + mapa do que falta + residual da TV encolhido. σ do final = (1−w)√(σ²mapa+σ²urna), σ mapa nos estados que faltam = '+fmt(t.sigMap)+' pp.</p>'+
-    '<p class="help">Intervalo 68%: Lula '+fmt(t.finL-t.sigFin)+'–'+fmt(t.finL+t.sigFin)+'%. Intervalo 95%: '+fmt(t.finL-2*t.sigFin)+'–'+fmt(t.finL+2*t.sigFin)+'%.</p>'+
-    '<p class="help"><b>P(Lula vence)</b> = '+pL+'% · <b>P(Flávio vence)</b> = '+pF+'% <span class="tiny">(normal, P(L>50) = Φ((μ−50)/σ))</span></p>'+
-    '<p class="help">Neste pedaço o mapa manda <span class="l">Lula '+fmt(t.exp.l)+'%</span> × <span class="f">Flávio '+fmt(t.exp.f)+'%</span>. '+lado+'</p>';
+    '<p class="help">Neste pedaço o mapa pede <span class="l">Lula '+fmt(t.exp.l)+'%</span> × <span class="f">Flávio '+fmt(t.exp.f)+'%</span>. '+lado+'</p>'+
+    '<p class="help">σ mapa (estados que faltam) '+fmt(t.sigMap)+' pp · σ final '+fmt(t.sigFin)+' pp · 95%: Lula '+fmt(t.finL-2*t.sigFin)+'–'+fmt(t.finL+2*t.sigFin)+'%</p>'+
+    '<p class="help"><b>P(Lula)</b> '+pL+'% · <b>P(Flávio)</b> '+(100-pL)+'%</p>'+
+    '<p class="tiny">Checagem: meio@15% deve ser Lula 35,0 × Flávio 65,0. 2018 nacional 44,9×55,1. 2022 nacional 50,9×49,1.</p>';
   drawBands();
 }
 function ensureSwing(){
@@ -202,7 +218,7 @@ function ensureSwing(){
   card.className='card s12';
   card.id='swingCard';
   card.innerHTML='<div class="k">Dois controles para acompanhar a noite</div>'+
-    '<p class="help">Mapa 2018–2022 + % apurado. A projeção do 2º turno junta a urna, o mapa do resto e um intervalo. Passe o mouse no gráfico para ver o % de cada etapa.</p>'+
+    '<p class="help">O % apurado é o número do slider — o gráfico não pode mais sobrescrever isso.</p>'+
     '<div class="k" style="margin-top:14px">1. Que eleição 2026 parece?</div>'+
     '<div id="swingEra" class="pick" style="margin:10px 0"><button type="button" data-era="18">2018 · Flávio</button><button type="button" data-era="mid">meio</button><button type="button" data-era="22">2022 · Lula</button></div>'+
     '<input id="swing" type="range" min="-1" max="1" step="0.01" value="0" />'+
@@ -218,40 +234,25 @@ function ensureSwing(){
     '<div class="v" id="nightVal" style="font-size:1.15rem">15% do Brasil apurado</div>'+
     '<div id="swingTrend" style="margin-top:12px"></div>'+
     '<div style="position:relative">'+
-      '<svg id="bbChart" viewBox="0 0 720 300" width="100%" height="300" role="img"></svg>'+
-      '<div id="bbTip" style="display:none;position:absolute;left:12px;top:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.08);pointer-events:none;max-width:260px"></div>'+
+      '<svg id="bbChart" viewBox="0 0 720 300" width="100%" height="300"></svg>'+
+      '<div id="bbTip" style="display:none;position:absolute;left:12px;top:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.08);pointer-events:none;max-width:280px"></div>'+
     '</div>'+
-    '<p class="tiny">Passe o mouse: aparece o % daquele ponto, o mapa, o envelope 2018/2022 e a banda ±2σ. Bolinha = TV agora.</p>';
+    '<p class="tiny">Passe o mouse no gráfico para o % daquela etapa. Linha vertical cinza = % que você escolheu.</p>';
   const mos=document.getElementById('mosaicoBR');
   if(mos&&mos.nextSibling) host.insertBefore(card, mos.nextSibling);
-  else {
-    const pick=document.getElementById('pickTurno');
-    if(pick&&pick.nextSibling) host.insertBefore(card, pick.nextSibling);
-    else host.insertBefore(card, host.firstChild);
-  }
+  else host.insertBefore(card, host.firstChild);
   document.getElementById('swing').addEventListener('input',ev=>applySwing(parseFloat(ev.target.value)));
   document.getElementById('swingEra').addEventListener('click',ev=>{
     const b=ev.target.closest('button'); if(!b) return;
     const v=b.dataset.era==='18'?-1:b.dataset.era==='22'?1:0;
     document.getElementById('swing').value=v; applySwing(v);
   });
-  document.getElementById('night').addEventListener('input',ev=>setPctApurado(parseFloat(ev.target.value), true));
+  document.getElementById('night').addEventListener('input',ev=>setPctApurado(parseFloat(ev.target.value)));
   document.getElementById('nightBtns').addEventListener('click',ev=>{
     const b=ev.target.closest('button'); if(!b) return;
-    setPctApurado(parseFloat(b.dataset.p), true);
+    setPctApurado(parseFloat(b.dataset.p));
   });
-  const pct=document.getElementById('pctBR');
-  if(pct) pct.addEventListener('input',()=>setPctApurado(parseFloat(pct.value)||0, false));
-  ['telaL','telaF'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.addEventListener('input',paintTrend);
-  });
-  const old=window.paint;
-  if(typeof old==='function' && !old._swingWrapped){
-    window.paint=function(r){ old(r); paintTrend(); };
-    window.paint._swingWrapped=true;
-  }
 }
 ensureSwing();
-applySwing(0);
-setPctApurado(clamp(parseFloat(document.getElementById('pctBR').value)||15,0,100), true);
+applySwing(window.SWING||0);
+setPctApurado(window.PCT||15);
