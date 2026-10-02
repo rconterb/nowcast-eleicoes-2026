@@ -29,6 +29,7 @@ function ensureFundamento(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureFundamento);
 else ensureFundamento();
 (function(){
+  const u=document.createElement('script'); u.src='ultimas.js'; document.body.appendChild(u);
   const a=document.createElement('script');
   a.src='turno.js';
   a.onload=function(){ const b=document.createElement('script'); b.src='swing.js'; document.body.appendChild(b); };
