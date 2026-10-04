@@ -6,21 +6,24 @@
     const card=document.createElement('div');
     card.className='card s12';
     card.id='ultimas';
-    card.innerHTML='<div class="k">Últimas pesquisas nacionais · puxadas em 2/10</div>'+
-      '<p class="help">O slider 2018/2022 continua sendo o mapa da noite. Estes números são o retrato nacional, não o pedaço da TV. PollingData ainda tem série de presidente até 1/10, mas a API de candidatos veio vazia nesta leitura.</p>'+
-      '<table style="margin-top:8px"><tr><th class="lft">Instituto</th><th>Data</th><th>1º Lula</th><th>1º Flávio</th><th>2º Lula</th><th>2º Flávio</th></tr>'+
-      '<tr><td class="lft">Datafolha</td><td>1/10</td><td>42</td><td>38</td><td class="l">48</td><td class="f">45</td></tr>'+
-      '<tr><td class="lft">Meio/Ideia</td><td>30/9</td><td>39,4</td><td>38,4</td><td class="l">48,5</td><td class="f">48</td></tr>'+
-      '<tr><td class="lft">Atlas/Bloomberg</td><td>29/9</td><td>45,3</td><td>42,2</td><td class="l">47,6</td><td class="f">47,7</td></tr>'+
-      '<tr><td class="lft">Quaest</td><td>28/9</td><td>39</td><td>34</td><td class="l">42</td><td class="f">42</td></tr>'+
-      '<tr><td class="lft">BTG/Nexus</td><td>28/9</td><td>42</td><td>37</td><td class="l">46</td><td class="f">44</td></tr>'+
-      '</table>'+
-      '<p class="tiny">2º turno: empate técnico em todos. Datafolha e Meio dão Lula na frente por 3 e 0,5 pp; Atlas empata 47,6×47,7; Quaest 42×42 (com mais branco/nulo). O painel antigo estava em pesquisas de ~23/9.</p>';
-    const pick=document.getElementById('pickTurno');
-    if(pick&&pick.nextSibling) host.insertBefore(card, pick.nextSibling);
-    else host.insertBefore(card, host.firstChild);
+    card.innerHTML='<div class="k">Urna agora · 7,59% apurado · Flávio 50,70 × Lula 40,98</div>'+
+      '<p class="help"><b>% apurado</b> é o peso da TV no Brasil, não o placar. 7,59% é só Santa Catarina inteira e cerca de 73% do Paraná. O resto (92,41%) ainda não entrou.</p>'+
+      '<p class="help"><b>50,70 × 40,98</b> é o pedaço, não o país. Os outros 8,32 pp são Cury, Renan, Caiado, branco e nulo. Em votos válidos entre os dois, isso vira 55,3 × 44,7 — Flávio não está em 50% do Brasil.</p>'+
+      '<p class="help"><b>Mapa</b> diz o que o Sul deveria dar. Em 2018 esse pedaço era 72 × 28 para a direita; em 2022, 66 × 34. A TV em 50,7 × 41 está 15 a 21 pp pior para o Flávio do que o Sul histórico.</p>'+
+      '<p class="help"><b>κ</b> = w/(w+0,28) = 0,213. Só 21% desse desvio passa para o que falta. O resto continua o mapa.</p>'+
+      '<p class="help"><b>Palpite do final</b> com essa urna: mapa 2022 → Lula 52,8 × Flávio 45,0. Meio → 50,6 × 47,1. Mapa 2018 → 48,5 × 49,3. Não é vitória no 1º turno: 50% dos válidos exige que os outros candidatos encolham.</p>'+
+      '<p class="tiny">P(vitória) do painel é P(passar de 50) no modelo de dois. No 1º turno real ainda há terceiro. Com 7,59% a urna pesa 27% do palpite (w + (1−w)κ); 73% ainda é mapa.</p>';
+    host.insertBefore(card, host.firstChild);
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', draw);
-  else draw();
-  setTimeout(draw, 400);
+  function seed(){
+    if(typeof setPctApurado!=='function') return;
+    window._telaTouched=true;
+    const L=document.getElementById('telaL'), F=document.getElementById('telaF');
+    if(L) L.value='40.98';
+    if(F) F.value='50.70';
+    setPctApurado(7.59);
+  }
+  draw();
+  setTimeout(draw, 500);
+  setTimeout(seed, 900);
 })();
